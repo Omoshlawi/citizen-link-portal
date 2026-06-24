@@ -1,4 +1,3 @@
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import {
   AboutUsPage,
   ChangeEmailVerifyPage,
@@ -11,6 +10,7 @@ import {
   TwoFactorVerifyPage,
   VerifyEmailPage,
 } from '@/features/landing/pages';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import { AddressManagementPage } from './features/addresses/pages';
 import { DocumentTypesPage, IAMPage, SystemSettingsPage, TransitionReasonsPage } from './features/admin/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
@@ -36,7 +36,7 @@ import { StationSelectionPage } from './features/station-context/pages';
 import { StatusTransitionsPage } from './features/status-transitions/pages';
 import { TemplateDetailPage, TemplatesPage } from './features/templates/pages';
 import UiComponents from './features/ui/UiComponents';
-import { UserDetailPage, UsersPage } from './features/users/pages';
+import { UserDetailPage } from './features/users/pages';
 
 const router = createBrowserRouter([
   {
