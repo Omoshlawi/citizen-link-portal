@@ -1,7 +1,9 @@
 import { Container, SimpleGrid, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { TablerIcon } from '@/components';
+import { useBrand } from '@/hooks/usePublicConfig';
 
 export default function HowItWorksPage() {
+  const brand = useBrand();
   const steps = [
     {
       title: 'Report a Document',
@@ -29,7 +31,7 @@ export default function HowItWorksPage() {
   return (
     <Container size="lg" py="xl">
       <Stack gap="xl">
-        <Title ta="center">How Citizen Link Works</Title>
+        <Title ta="center">How {brand.appName} Works</Title>
         <Text ta="center" c="dimmed" size="lg">
           The most advanced document matching system designed for speed and security.
         </Text>

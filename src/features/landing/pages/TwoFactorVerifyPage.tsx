@@ -14,8 +14,10 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { authClient } from '@/lib/api';
 import { TablerIcon } from '@/components';
+import { useBrand } from '@/hooks/usePublicConfig';
 
 const TwoFactorVerifyPage = () => {
+  const brand = useBrand();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
@@ -65,7 +67,7 @@ const TwoFactorVerifyPage = () => {
           Two-Factor Authentication
         </Title>
         <Text size="sm" c="dimmed" ta="center" maw={320}>
-          Open your authenticator app and enter the 6-digit code shown for CitizenLink.
+          Open your authenticator app and enter the 6-digit code shown for {brand.appName}.
         </Text>
       </Stack>
 

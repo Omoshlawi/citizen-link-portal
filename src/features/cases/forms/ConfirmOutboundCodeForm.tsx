@@ -5,6 +5,7 @@ import { TablerIcon } from '@/components';
 import { formatDate } from '@/lib/utils/helpers';
 import { useActiveOutboundExchange, useExchangeApi } from '@/features/exchange';
 import { Claim } from '@/features/claims/types';
+import { useBrand } from '@/hooks/usePublicConfig';
 
 type ConfirmOutboundCodeFormProps = {
   claim: Claim;
@@ -22,6 +23,7 @@ const ConfirmOutboundCodeForm: React.FC<ConfirmOutboundCodeFormProps> = ({
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const brand = useBrand();
   const { verifyOutboundCode } = useExchangeApi();
   const { exchange } = useActiveOutboundExchange(claim.id);
 
@@ -56,7 +58,7 @@ const ConfirmOutboundCodeForm: React.FC<ConfirmOutboundCodeFormProps> = ({
       <Stack gap="md">
         <Stack gap={4}>
           <Text size="sm" c="dimmed">
-            Ask the claimant to show the 6-digit code from their Citizen Link app. Enter it below
+            Ask the claimant to show the 6-digit code from their {brand.appName} app. Enter it below
             to confirm the handover.
           </Text>
           {exchange?.expiresAt && (

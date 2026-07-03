@@ -26,6 +26,7 @@ import { showNotification } from '@mantine/notifications';
 import QRCode from 'qrcode';
 import { authClient } from '@/lib/api';
 import { TablerIcon } from '@/components';
+import { useBrand } from '@/hooks/usePublicConfig';
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
@@ -52,6 +53,7 @@ function extractSecret(uri: string): string {
 const TwoFactorSettings = () => {
   const { data: session, refetch: refetchSession } = authClient.useSession();
   const user = session?.user;
+  const brand = useBrand();
 
   // Enable modal state
   const [enableOpened, { open: openEnable, close: closeEnableRaw }] = useDisclosure(false);
@@ -432,7 +434,7 @@ const TwoFactorSettings = () => {
                 Enter the code from your app
               </Text>
               <Text size="sm" c="dimmed">
-                Open your authenticator app and enter the 6-digit code shown for CitizenLink.
+                Open your authenticator app and enter the 6-digit code shown for {brand.appName}.
               </Text>
             </Box>
 
