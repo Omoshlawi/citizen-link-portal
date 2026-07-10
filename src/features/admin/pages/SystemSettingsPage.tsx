@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Badge, Menu, Text } from '@mantine/core';
+import { ActionIcon, Badge, Button, Menu, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
@@ -12,7 +12,7 @@ import {
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
-import { SystemSettingForm } from '../forms';
+import { LogoUploadForm, SystemSettingForm } from '../forms';
 import { useSystemSettings, useSystemSettingsApi } from '../hooks';
 import { SystemSetting } from '../types';
 
@@ -61,12 +61,47 @@ const SystemSettingsPage = () => {
     );
   };
 
+  const openLogoUpload = () => {
+    const id = modals.open({
+      title: 'Upload logo',
+      children: <LogoUploadForm onClose={() => modals.close(id)} />,
+    });
+  };
+
   return (
     <div>
       <DashboardPageHeader
         title="System Settings"
         subTitle="View and edit runtime configuration variables"
         icon="adjustments"
+        traiiling={
+          <SystemAuthorized
+            permissions={{ setting: ['manage-system'] }}
+            unauthorizedAction={{ type: 'hide' }}
+          >
+            <Menu shadow="md" width={180} position="bottom-end">
+              <Menu.Target>
+                <Button
+                  variant="light"
+                  size="xs"
+                  leftSection={<TablerIcon name="upload" size={14} />}
+                  rightSection={<TablerIcon name="chevronDown" size={14} />}
+                >
+                  Upload
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>Uploads</Menu.Label>
+                <Menu.Item
+                  leftSection={<TablerIcon name="photo" size={14} />}
+                  onClick={openLogoUpload}
+                >
+                  Logo
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </SystemAuthorized>
+        }
       />
       <StateFullDataTable
         {...settingsAsync}

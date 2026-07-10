@@ -26,3 +26,19 @@ export const uploadFile = async (file: File) => {
 
   return key;
 };
+
+/** Upload one non-document asset (e.g. logo) to the public static bucket; returns the S3 key. */
+export const uploadStaticFile = async (file: File): Promise<string> => {
+  const form = new FormData();
+  form.append('file', file);
+  // Post straight through httpClient (like uploadFile's PUT) so axios sets the
+  // multipart boundary; apiFetch would force application/json.
+  const res = await httpClient.post<{ key: string }>('/api/files/upload?type=static', form, {
+    headers: { Accept: 'application/json' },
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+    timeout: 300000,
+  });
+
+  return res.data.key;
+};
