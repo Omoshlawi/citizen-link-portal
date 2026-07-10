@@ -1,6 +1,8 @@
-import { Button, Container, Group, Stack, Text, Textarea, TextInput, Title } from '@mantine/core';
+import { Anchor, Button, Container, Group, Stack, Text, Textarea, TextInput, Title } from '@mantine/core';
+import { usePublicConfig } from '@/hooks/usePublicConfig';
 
 export default function ContactUsPage() {
+  const { supportEmail, supportPhone } = usePublicConfig();
   return (
     <Container size="sm" py="xl">
       <Stack gap="xl">
@@ -8,6 +10,16 @@ export default function ContactUsPage() {
         <Text ta="center" c="dimmed">
           Have questions or need assistance? Reach out to our team.
         </Text>
+
+        <Group justify="center" gap="xl">
+          <Text size="sm">
+            Email:{' '}
+            <Anchor href={`mailto:${supportEmail}`}>{supportEmail}</Anchor>
+          </Text>
+          <Text size="sm">
+            Phone: <Anchor href={`tel:${supportPhone.replace(/\s+/g, '')}`}>{supportPhone}</Anchor>
+          </Text>
+        </Group>
 
         <form onSubmit={(e) => e.preventDefault()}>
           <Stack gap="md">

@@ -18,12 +18,14 @@ import { Notifications } from '@mantine/notifications';
 import { ApiConfigProvider } from '@/lib/api';
 import { Router } from '@/Router';
 import { theme } from '@/theme';
+import BrandMeta from '@/components/BrandMeta';
 
 export default function App() {
   return (
     <ApiConfigProvider>
       <MantineProvider theme={theme}>
         <ModalsProvider>
+          <BrandMeta />
           <Notifications />
           <Router />
         </ModalsProvider>

@@ -18,11 +18,13 @@ import {
 } from '@mantine/core';
 import { TablerIcon } from '@/components';
 import { useDocumentTypes } from '@/features/admin/hooks';
+import { usePublicConfig } from '@/hooks/usePublicConfig';
 import { Dots } from '../components/Welcome/Dots';
 
 export function HomePage() {
   const { documentTypes } = useDocumentTypes();
   const colorScheme = useComputedColorScheme();
+  const { appName } = usePublicConfig();
   const features = [
     {
       icon: 'brain',
@@ -46,7 +48,7 @@ export function HomePage() {
       icon: 'mapPin',
       title: 'Nationwide Station Network',
       description:
-        'Drop off or collect verified documents at any CitizenLink partner station, or request doorstep delivery.',
+        `Drop off or collect verified documents at any ${appName} partner station, or request doorstep delivery.`,
     },
     {
       icon: 'lock',
@@ -166,7 +168,7 @@ export function HomePage() {
               mb={rem(48)}
               style={{ lineHeight: 1.65 }}
             >
-              CitizenLink uses AI vision extraction and semantic search to reunite people with their
+              {appName} uses AI vision extraction and semantic search to reunite people with their
               lost identity documents — securely, quickly, and with full privacy protection.
             </Text>
 
@@ -323,7 +325,7 @@ export function HomePage() {
           Built different
         </Badge>
         <Title order={2} ta="center" mb="sm" style={{ fontSize: rem(36), fontWeight: 800 }}>
-          Why Choose CitizenLink?
+          Why Choose {appName}?
         </Title>
         <Text c="dimmed" ta="center" maw={580} mx="auto" mb={rem(60)} size="lg">
           Engineered to simplify recovery, maximize reach, and protect your data throughout the
@@ -459,7 +461,7 @@ export function HomePage() {
             Ready to recover what's yours?
           </Title>
           <Text c="dimmed" size="lg" maw={500} mx="auto" mb="xl">
-            Join thousands of citizens already using CitizenLink to safely recover their most
+            Join thousands of citizens already using {appName} to safely recover their most
             important documents.
           </Text>
           <Group justify="center" gap="md">

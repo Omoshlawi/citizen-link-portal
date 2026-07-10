@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Alert, Button, Group, PinInput, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
-import { formatDate } from '@/lib/utils/helpers';
-import { useActiveOutboundExchange, useExchangeApi } from '@/features/exchange';
 import { Claim } from '@/features/claims/types';
+import { useActiveOutboundExchange, useExchangeApi } from '@/features/exchange';
+import { usePublicConfig } from '@/hooks/usePublicConfig';
+import { formatDate } from '@/lib/utils/helpers';
 
 type ConfirmOutboundCodeFormProps = {
   claim: Claim;
@@ -22,11 +23,14 @@ const ConfirmOutboundCodeForm: React.FC<ConfirmOutboundCodeFormProps> = ({
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { appName } = usePublicConfig();
   const { verifyOutboundCode } = useExchangeApi();
   const { exchange } = useActiveOutboundExchange(claim.id);
 
   const handleConfirm = async () => {
-    if (code.length !== 6) return;
+    if (code.length !== 6) {
+      return;
+    }
     setError(null);
     setIsLoading(true);
     try {
@@ -56,8 +60,8 @@ const ConfirmOutboundCodeForm: React.FC<ConfirmOutboundCodeFormProps> = ({
       <Stack gap="md">
         <Stack gap={4}>
           <Text size="sm" c="dimmed">
-            Ask the claimant to show the 6-digit code from their Citizen Link app. Enter it below
-            to confirm the handover.
+            Ask the claimant to show the 6-digit code from their {appName} app. Enter it below to
+            confirm the handover.
           </Text>
           {exchange?.expiresAt && (
             <Text size="xs" c="dimmed">

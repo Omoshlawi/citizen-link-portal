@@ -12,8 +12,10 @@ import {
   Title,
 } from '@mantine/core';
 import { ColorSchemeToggle, Logo } from '@/components';
+import { usePublicConfig } from '@/hooks/usePublicConfig';
 
 const AuthLayout = () => {
+  const { appName } = usePublicConfig();
   return (
     <AppShell>
       <AppShell.Main p={0}>
@@ -115,7 +117,7 @@ const AuthLayout = () => {
             {/* Footer */}
             <Box style={{ zIndex: 1, position: 'relative' }}>
               <Text size="xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                &copy; {new Date().getFullYear()} Citizen Link. All rights reserved.
+                &copy; {new Date().getFullYear()} {appName}. All rights reserved.
               </Text>
             </Box>
           </Grid.Col>

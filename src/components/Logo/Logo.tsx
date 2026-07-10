@@ -1,16 +1,17 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Image } from '@mantine/core';
-import logoHorizontal from './logo-horizontal.png';
-import logoIcon from './logo-icon.png';
-import logoName from './logo-name.png';
-import logoVertical from './logo-vertical.png';
+import { Box, Image, Text } from '@mantine/core';
+import { usePublicConfig } from '@/hooks/usePublicConfig';
 import styles from './Logo.module.css';
 
 type LogoProps = {
+  // Retained for call-site compatibility; the logo is now a single dynamic image.
   mode?: 'name' | 'icon' | 'vertical' | 'horizontal';
 };
-const Logo: FC<LogoProps> = ({ mode = 'horizontal' }) => {
+
+const Logo: FC<LogoProps> = () => {
+  const { logoUrl, appName } = usePublicConfig();
+
   return (
     <Box
       className={styles.logoContainer}
@@ -18,21 +19,20 @@ const Logo: FC<LogoProps> = ({ mode = 'horizontal' }) => {
       to="/"
       style={{ textDecoration: 'none' }}
     >
-      <Image
-        src={
-          mode === 'name'
-            ? logoName
-            : mode === 'vertical'
-              ? logoVertical
-              : mode === 'horizontal'
-                ? logoHorizontal
-                : logoIcon
-        }
-        h={40}
-        w="auto"
-        fit="contain"
-        style={{ cursor: 'pointer' }}
-      />
+      {logoUrl ? (
+        <Image
+          src={logoUrl}
+          alt={appName}
+          h={40}
+          w="auto"
+          fit="contain"
+          style={{ cursor: 'pointer' }}
+        />
+      ) : (
+        <Text fw={800} size="xl" c="civicNavy.7" style={{ cursor: 'pointer' }}>
+          {appName}
+        </Text>
+      )}
     </Box>
   );
 };
