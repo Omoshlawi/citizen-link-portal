@@ -235,12 +235,36 @@ export interface AIExtraction {
   createdAt: string;
 }
 
+/** One LLM call's metrics, as recorded by docai. */
+export interface DocaiUsageCall {
+  call: number;
+  input_tokens: number;
+  output_tokens: number;
+  latency_ms: number;
+}
+
+/**
+ * Per-stage token/model usage, proxied verbatim from docai's UsageSummary.to_dict()
+ * (citizen-link-docai/app/models/pipeline.py). Snake_case because it is docai's shape,
+ * not ours — keep it in step with that file. Fields are optional: stages predating a
+ * field, or with no LLM call at all, simply omit it.
+ */
+export interface DocaiStageUsage {
+  model?: string;
+  provider?: string;
+  calls?: DocaiUsageCall[];
+  total_input_tokens?: number;
+  total_output_tokens?: number;
+  total_latency_ms?: number;
+  estimated_cost_usd?: number | null;
+}
+
 export interface DocaiStage {
   stage_id: string;
   stage: string;
   status: string;
   error: string | null;
-  usage: Record<string, unknown> | null;
+  usage: DocaiStageUsage | null;
   started_at: string | null;
   completed_at: string;
   conversations: DocaiConversation[];
