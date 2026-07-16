@@ -19,7 +19,6 @@ import { useActiveExchange } from '@/features/exchange';
 import { useDocumentCase } from '../hooks';
 import {
   CaseType,
-  ExtractionStatus,
   FoundDocumentCaseStatus,
   LostDocumentCaseStatus,
 } from '../types';
@@ -137,9 +136,6 @@ const DocumentCaseDetail = () => {
               document={reportData.document!}
               reportType={reportType}
               status={status}
-              failed={reportData.extractions
-                ?.slice()
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.extractionStatus !== ExtractionStatus.COMPLETED}
             />
           </Paper>
         </Tabs.Panel>
