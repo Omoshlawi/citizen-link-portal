@@ -39,19 +39,16 @@ const CaseExtractionAlert = ({
     return null;
   }
 
-  const { extractionStatus, currentStep, resolutionType, resolvedById } = extraction;
+  const { extractionStatus, currentStep, resolutionType, failureReason } = extraction;
 
   if (extractionStatus === 'COMPLETED') {
     return null;
   }
 
   if (extractionStatus === 'FAILED') {
-
-    // Auto-resolved by the system (resolvedById is null) vs confirmed by a staff member
-    const isAutoResolved = !!resolutionType && !resolvedById;
-    const isStaffResolved = !!resolutionType && !!resolvedById;
+    // Nothing auto-resolves any more — a resolution exists only once staff set one.
+    const isResolved = !!resolutionType;
     const badge = resolutionType ? RESOLUTION_BADGE[resolutionType] : null;
-    const isStaffHandling = resolutionType === ExtractionResolutionType.STAFF_HANDLING;
 
     const STAFF_RESOLUTION_COPY: Record<ExtractionResolutionType, string> = {
       [ExtractionResolutionType.RESUBMIT_IMAGE]:
@@ -59,116 +56,79 @@ const CaseExtractionAlert = ({
       [ExtractionResolutionType.SUBMIT_NEW_CASE]:
         'The citizen has been asked to submit a new case. No action required until they do.',
       [ExtractionResolutionType.STAFF_HANDLING]:
-        'Automated extraction failed after two attempts. If the document images are readable, enter the fields manually. If the images are wrong or unusable, use "Review & Resolve" to request new images from the citizen.',
+        'Marked as staff-handled — the citizen has been told you are looking into it. If the images are readable, enter the fields manually.',
     };
 
     const openResolve = () => {
       const close = launchWorkspace(
         <ResolveExtractionForm documentCase={documentCase} onClose={() => close()} />,
-        { title: 'Resolve Extraction Failure' }
+        { title: 'Review Document Processing' }
       );
     };
 
     const openEnterFields = () => {
       const close = launchWorkspace(
-        <UpdateDocumentinfoForm
-          document={documentCase.document!}
-          closeWorkspace={() => close()}
-        />,
+        <UpdateDocumentinfoForm document={documentCase.document!} closeWorkspace={() => close()} />,
         { title: 'Enter Document Fields Manually' }
       );
     };
 
-    // Auto-set STAFF_HANDLING: staff hasn't reviewed yet — show both actions
-    if (isAutoResolved && isStaffHandling) {
-      return (
-        <Alert
-          variant="light"
-          color="yellow"
-          icon={<TablerIcon name="alertTriangle" size={16} />}
-          title={
-            <Stack gap={4}>
-              <Text size="sm" fw={600}>
-                Extraction Failure — Awaiting Staff Action
-              </Text>
-              {badge && (
-                <Badge color={badge.color} variant="light" size="xs">
-                  {badge.label}
-                </Badge>
-              )}
-            </Stack>
-          }
-        >
-          <Stack gap="xs">
-            <Text size="sm">{STAFF_RESOLUTION_COPY[ExtractionResolutionType.STAFF_HANDLING]}</Text>
-            {canResolve && (
-              <Group gap="xs">
-                {documentCase.document && (
-                  <Button
-                    size="xs"
-                    variant="outline"
-                    color="civicBlue"
-                    leftSection={<TablerIcon name="forms" size={13} />}
-                    onClick={openEnterFields}
-                  >
-                    Enter Fields Manually
-                  </Button>
-                )}
-                <Button
-                  size="xs"
-                  variant="outline"
-                  color="yellow"
-                  leftSection={<TablerIcon name="messageCircle" size={13} />}
-                  onClick={openResolve}
-                >
-                  Review & Resolve
-                </Button>
-              </Group>
-            )}
-          </Stack>
-        </Alert>
-      );
-    }
-
     return (
       <Alert
         variant="light"
-        color={isStaffResolved ? 'civicBlue' : 'yellow'}
-        icon={<TablerIcon name={isStaffResolved ? 'infoCircle' : 'alertTriangle'} size={16} />}
+        color={isResolved ? 'civicBlue' : 'yellow'}
+        icon={<TablerIcon name={isResolved ? 'infoCircle' : 'alertTriangle'} size={16} />}
         title={
-          isStaffResolved ? (
-            <Stack gap={4}>
-              <Text size="sm" fw={600}>
-                Extraction Failure — Resolved
-              </Text>
-              {badge && (
-                <Badge color={badge.color} variant="light" size="xs">
-                  {badge.label}
-                </Badge>
-              )}
-            </Stack>
-          ) : (
-            'Extraction Failed — Pending Review'
-          )
+          <Stack gap={4}>
+            <Text size="sm" fw={600}>
+              {isResolved ? 'Document Processing — Resolved' : 'Document Processing — Needs Review'}
+            </Text>
+            {badge && (
+              <Badge color={badge.color} variant="light" size="xs">
+                {badge.label}
+              </Badge>
+            )}
+          </Stack>
         }
       >
         <Stack gap="xs">
           <Text size="sm">
-            {isStaffResolved
+            {isResolved
               ? STAFF_RESOLUTION_COPY[resolutionType!]
-              : 'Document processing failed. A staff member needs to review this case and notify the user.'}
+              : "Automated processing didn't complete. Review the images and choose how to proceed."}
           </Text>
-          {canResolve && !isStaffResolved && (
-            <Button
-              size="xs"
-              variant="outline"
-              color="yellow"
-              leftSection={<TablerIcon name="messageCircle" size={13} />}
-              onClick={openResolve}
-              w="fit-content"
-            >
-              Review & Resolve
-            </Button>
+
+          {/* Raw diagnostic — the only signal separating an unreadable image from our own
+              outage, and the citizen is never blamed for the latter without a human deciding. */}
+          {!isResolved && failureReason && (
+            <Text size="xs" c="dimmed" ff="monospace">
+              {failureReason}
+            </Text>
+          )}
+
+          {canResolve && !isResolved && (
+            <Group gap="xs">
+              {documentCase.document && (
+                <Button
+                  size="xs"
+                  variant="outline"
+                  color="civicBlue"
+                  leftSection={<TablerIcon name="forms" size={13} />}
+                  onClick={openEnterFields}
+                >
+                  Enter Fields Manually
+                </Button>
+              )}
+              <Button
+                size="xs"
+                variant="outline"
+                color="yellow"
+                leftSection={<TablerIcon name="messageCircle" size={13} />}
+                onClick={openResolve}
+              >
+                Review &amp; Resolve
+              </Button>
+            </Group>
           )}
         </Stack>
       </Alert>

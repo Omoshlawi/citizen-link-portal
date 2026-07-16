@@ -217,11 +217,11 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
                       documentCase={documentCase}
                       onClose={() => close()}
                     />,
-                    { title: 'Resolve Extraction Failure' }
+                    { title: 'Review Document Processing' }
                   );
                 }}
               >
-                Resolve Extraction
+                Review Document Processing
               </Menu.Item>
             </>
           )}
