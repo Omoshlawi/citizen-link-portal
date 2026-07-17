@@ -3,7 +3,7 @@ import { launchWorkspace, TablerIcon } from '@/components';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import ResolveExtractionForm from '../forms/ResolveExtractionForm';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
-import { AIExtraction, CaseType, DocumentCase, ExtractionResolutionType } from '../types';
+import { AIExtraction, DocumentCase, ExtractionResolutionType } from '../types';
 
 const STEP_LABEL: Record<string, string> = {
   VISION: 'Image Scan',
@@ -21,21 +21,16 @@ const RESOLUTION_BADGE: Record<ExtractionResolutionType, { label: string; color:
 
 interface CaseExtractionAlertProps {
   extraction?: AIExtraction;
-  reportType: CaseType;
-  lostAuto?: boolean;
   documentCase: DocumentCase;
 }
 
-const CaseExtractionAlert = ({
-  extraction,
-  reportType,
-  lostAuto,
-  documentCase,
-}: CaseExtractionAlertProps) => {
-  const hasExtraction = reportType === 'FOUND' || lostAuto;
+const CaseExtractionAlert = ({ extraction, documentCase }: CaseExtractionAlertProps) => {
   const { hasAccess: canResolve } = useUserHasSystemAccess({ documentCase: ['resolveExtraction'] });
 
-  if (!hasExtraction || !extraction) {
+  // Gate on the extraction itself, not the case type. A lost case with a photo is
+  // auto=false yet has a real extraction — keying off lostAuto hid those from staff
+  // entirely, failures included.
+  if (!extraction) {
     return null;
   }
 

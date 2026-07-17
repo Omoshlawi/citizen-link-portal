@@ -84,8 +84,6 @@ const DocumentCaseDetail = () => {
         extraction={reportData.extractions
           ?.slice()
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]}
-        reportType={reportType}
-        lostAuto={reportData.lostDocumentCase?.auto}
         documentCase={reportData}
       />
 
