@@ -240,8 +240,9 @@ const DocumentCasesPage = () => {
           const extraction = original.extractions
             ?.slice()
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-          const isManualLost = !!original.lostDocumentCase && !original.lostDocumentCase.auto;
-          if (!extraction || isManualLost) {
+          // Keyed on the extraction existing, not on lostDocumentCase.auto — a lost case
+          // with an attached photo is auto=false yet does extract.
+          if (!extraction) {
             return (
               <Text size="sm" c="dimmed">
                 —
