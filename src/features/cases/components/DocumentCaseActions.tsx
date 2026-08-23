@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button, Group, Menu } from '@mantine/core';
 import { launchWorkspace, TablerIcon } from '@/components';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
+import AnonymizeCaseForm from '../forms/AnonymizeCaseForm';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
 import ResolveExtractionForm from '../forms/ResolveExtractionForm';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
@@ -42,6 +43,7 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   const { hasAccess: canResolveExtraction } = useUserHasSystemAccess({
     documentCase: ['resolveExtraction'],
   });
+  const { hasAccess: canAnonymize } = useUserHasSystemAccess({ documentCase: ['anonymize'] });
 
   const latestExtraction = documentCase.extractions
     ?.slice()
@@ -68,6 +70,13 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
     const close = launchWorkspace(
       <RejectFoundDocumentCaseForm documentCase={documentCase} onClose={() => close()} />,
       { title: 'Reject Found Document Case' }
+    );
+  };
+
+  const openAnonymize = () => {
+    const close = launchWorkspace(
+      <AnonymizeCaseForm documentCase={documentCase} onClose={() => close()} />,
+      { title: 'Anonymize Case' }
     );
   };
 
@@ -249,6 +258,18 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
                   Reject Case
                 </Menu.Item>
               )}
+            </>
+          )}
+          {canAnonymize && !documentCase.anonymizedAt && !documentCase.voided && (
+            <>
+              <Menu.Divider />
+              <Menu.Item
+                leftSection={<TablerIcon name="shieldOff" size={14} />}
+                color="red"
+                onClick={openAnonymize}
+              >
+                Anonymize Case
+              </Menu.Item>
             </>
           )}
         </Menu.Dropdown>

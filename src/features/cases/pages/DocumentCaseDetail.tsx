@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { Badge, Group, Paper, Stack, Tabs, Text } from '@mantine/core';
+import { Alert, Badge, Group, Paper, Stack, Tabs, Text } from '@mantine/core';
 import { DashboardPageHeader, ErrorState, StatusBadge, TablerIcon } from '@/components';
 import { TablerIconName } from '@/components/TablerIcon';
 import {
@@ -79,6 +79,18 @@ const DocumentCaseDetail = () => {
           />
         }
       />
+
+      {reportData.anonymizedAt && (
+        <Alert
+          color="orange"
+          icon={<TablerIcon name="shieldOff" size={16} />}
+          title="PII Anonymized"
+        >
+          The personally identifiable information for this case was anonymized on{' '}
+          {new Date(reportData.anonymizedAt).toLocaleDateString()}. Document fields, images, and
+          extracted data have been stripped.
+        </Alert>
+      )}
 
       <CaseExtractionAlert
         extraction={reportData.extractions

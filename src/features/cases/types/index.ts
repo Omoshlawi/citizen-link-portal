@@ -19,6 +19,7 @@ export interface DocumentCase {
   createdAt: string;
   updatedAt: string;
   voided: boolean;
+  anonymizedAt?: string | null;
   lostDocumentCase?: LostDocumentCase;
   foundDocumentCase?: FoundDocumentCase;
   document?: Document;
