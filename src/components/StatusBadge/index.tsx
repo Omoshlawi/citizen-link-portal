@@ -2,7 +2,8 @@ import { Badge } from '@mantine/core';
 
 // ─── Status → color mapping ───────────────────────────────────────────────────
 // Covers: FoundDocumentCaseStatus, LostDocumentCaseStatus, ClaimStatus,
-// and AIExtraction extractionStatus. Add new statuses here as the platform grows.
+// AIExtraction extractionStatus, and ChatReportStatus.
+// Add new statuses here as the platform grows.
 
 const STATUS_COLOR: Record<string, string> = {
   // Found document case
@@ -23,6 +24,9 @@ const STATUS_COLOR: Record<string, string> = {
   FAILED: 'red',
   // Match
   CLAIMED: 'teal',
+  // Chat report moderation
+  REVIEWED: 'civicGreen',
+  DISMISSED: 'gray',
   // Custody
   WITH_FINDER: 'civicGold',
   IN_CUSTODY: 'teal',
@@ -44,6 +48,9 @@ const STATUS_LABEL: Record<string, string> = {
   SCHEDULED: 'Scheduled',
   IN_PROGRESS: 'In Progress',
   FAILED: 'Failed',
+  // Chat report moderation
+  REVIEWED: 'Reviewed',
+  DISMISSED: 'Dismissed',
   // Match
   CLAIMED: 'Claimed',
   // Custody

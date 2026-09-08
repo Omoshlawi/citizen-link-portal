@@ -38,6 +38,7 @@ const navConfig: NavEntry[] = [
       { icon: 'filterQuestion', label: 'Claims', href: 'claims' },
       { icon: 'exchange', label: 'Matches', href: 'matches' },
       { icon: 'history', label: 'Status Transitions', href: 'status-transitions' },
+      { icon: 'messageReport', label: 'Chat Reports', href: 'chat-reports' },
     ],
   },
   {

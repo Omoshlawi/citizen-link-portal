@@ -34,6 +34,7 @@ import {
 } from './features/station-context/components';
 import { StationSelectionPage } from './features/station-context/pages';
 import { StatusTransitionsPage } from './features/status-transitions/pages';
+import { ChatReportDetailPage, ChatReportsPage } from './features/chat-reports/pages';
 import { TemplateDetailPage, TemplatesPage } from './features/templates/pages';
 import UiComponents from './features/ui/UiComponents';
 import { UserDetailPage } from './features/users/pages';
@@ -192,6 +193,14 @@ const router = createBrowserRouter([
             children: [
               { index: true, element: <TemplatesPage /> },
               { path: ':id', element: <TemplateDetailPage /> },
+            ],
+          },
+          {
+            path: 'chat-reports',
+            element: <Outlet />,
+            children: [
+              { index: true, element: <ChatReportsPage /> },
+              { path: ':reportId', element: <ChatReportDetailPage /> },
             ],
           },
         ],
