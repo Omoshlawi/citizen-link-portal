@@ -5,7 +5,7 @@ import { Button, Group, Radio, Stack, Text, Textarea } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { handleApiErrors } from '@/lib/api';
 import { useChatReportApi } from '../hooks';
-import { ChatReport, ChatReportDetail, ResolveReportFormData } from '../types';
+import { ChatReport, ChatReportDetail, ChatReportStatus, ResolveReportFormData } from '../types';
 import { resolveReportSchema } from '../utils/validation';
 
 interface ResolveReportFormProps {
@@ -17,7 +17,7 @@ interface ResolveReportFormProps {
 const ResolveReportForm: FC<ResolveReportFormProps> = ({ report, onClose, onSuccess }) => {
   const form = useForm<ResolveReportFormData>({
     resolver: zodResolver(resolveReportSchema),
-    defaultValues: { status: 'REVIEWED', resolutionNote: '' },
+    defaultValues: { status: ChatReportStatus.REVIEWED, resolutionNote: '' },
   });
   const { resolveReport } = useChatReportApi();
 
@@ -74,12 +74,12 @@ const ResolveReportForm: FC<ResolveReportFormProps> = ({ report, onClose, onSucc
               >
                 <Stack gap="xs" mt="xs">
                   <Radio
-                    value="REVIEWED"
+                    value={ChatReportStatus.REVIEWED}
                     label="Reviewed"
                     description="The report was valid and has been acted on"
                   />
                   <Radio
-                    value="DISMISSED"
+                    value={ChatReportStatus.DISMISSED}
                     label="Dismissed"
                     description="No problem with the reply, or the report was not actionable"
                   />

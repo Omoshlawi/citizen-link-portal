@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Badge, Box, Group, Paper, Stack, Text } from '@mantine/core';
 import { formatDateTime } from '@/lib/utils';
-import { ChatTranscriptMessage } from '../types';
+import { ChatMessageRole, ChatTranscriptMessage } from '../types';
 
 interface TranscriptViewProps {
   messages: ChatTranscriptMessage[];
@@ -25,7 +25,7 @@ const TranscriptView: FC<TranscriptViewProps> = ({
   // mark a hit if exactly one message matches — otherwise nothing is marked
   // rather than the wrong turn.
   const contentMatches = messages.filter(
-    (m) => m.role === 'ASSISTANT' && m.content.trim() === reportedContent.trim()
+    (m) => m.role === ChatMessageRole.ASSISTANT && m.content.trim() === reportedContent.trim()
   );
   const fallbackId = contentMatches.length === 1 ? contentMatches[0].id : null;
   const markedId = reportedMessageId ?? fallbackId;
@@ -42,7 +42,7 @@ const TranscriptView: FC<TranscriptViewProps> = ({
     <Stack gap="sm">
       {messages.map((message) => {
         const isReported = message.id === markedId;
-        const isBot = message.role === 'ASSISTANT';
+        const isBot = message.role === ChatMessageRole.ASSISTANT;
         return (
           <Paper
             key={message.id}

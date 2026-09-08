@@ -24,7 +24,7 @@ import { formatDateTime } from '@/lib/utils';
 import TranscriptView from '../components/TranscriptView';
 import ResolveReportForm from '../forms/ResolveReportForm';
 import { useChatReport } from '../hooks';
-import { ChatReportStatus } from '../types';
+import { ChatReportReason, ChatReportStatus } from '../types';
 import { REASON_COLOR, REASON_LABEL } from '../utils/labels';
 
 const ChatReportDetailPage = () => {
@@ -104,11 +104,21 @@ const ChatReportDetailPage = () => {
             {report.details && (
               <Box>
                 <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
-                  What the reporter added
+                  {report.reason === ChatReportReason.OTHER
+                    ? 'Why they reported it'
+                    : 'What the reporter added'}
                 </Text>
-                <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
-                  {report.details}
-                </Text>
+                {/* For "Other" this is the only signal the report carries, and
+                    the API now requires it — so give it the same weight as the
+                    reply itself rather than treating it as an aside. */}
+                <Paper
+                  withBorder={report.reason === ChatReportReason.OTHER}
+                  p={report.reason === ChatReportReason.OTHER ? 'sm' : 0}
+                >
+                  <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                    {report.details}
+                  </Text>
+                </Paper>
               </Box>
             )}
           </Stack>

@@ -11,13 +11,13 @@ import {
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { formatDate } from '@/lib/utils';
 import { useChatReports } from '../hooks';
-import { ChatReport } from '../types';
+import { ChatReport, ChatReportReason, ChatReportStatus } from '../types';
 import { REASON_COLOR, REASON_OPTIONS, REASON_SHORT } from '../utils/labels';
 
 const STATUS_OPTIONS = [
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'REVIEWED', label: 'Reviewed' },
-  { value: 'DISMISSED', label: 'Dismissed' },
+  { value: ChatReportStatus.PENDING, label: 'Pending' },
+  { value: ChatReportStatus.REVIEWED, label: 'Reviewed' },
+  { value: ChatReportStatus.DISMISSED, label: 'Dismissed' },
 ];
 
 const ChatReportsPage = () => {
@@ -107,9 +107,18 @@ const columns: ColumnDef<ChatReport>[] = [
     accessorKey: 'reason',
     header: 'Reason',
     cell: ({ row: { original } }) => (
-      <Badge variant="light" size="xs" color={REASON_COLOR[original.reason]}>
-        {REASON_SHORT[original.reason]}
-      </Badge>
+      <Stack gap={4}>
+        <Badge variant="light" size="xs" color={REASON_COLOR[original.reason]} w="fit-content">
+          {REASON_SHORT[original.reason]}
+        </Badge>
+        {/* "Other" says nothing on its own — the reporter's note is the only
+            signal, so surface it here rather than making a reviewer open the row. */}
+        {original.reason === ChatReportReason.OTHER && original.details && (
+          <Text size="xs" c="dimmed" lineClamp={2} maw={220}>
+            {original.details}
+          </Text>
+        )}
+      </Stack>
     ),
   },
   {

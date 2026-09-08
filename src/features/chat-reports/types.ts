@@ -7,12 +7,19 @@ export enum ChatReportStatus {
   DISMISSED = 'DISMISSED',
 }
 
+// Order matches the app's reason picker so both surfaces read the same way.
 export enum ChatReportReason {
+  INACCURATE = 'INACCURATE',
   HARMFUL = 'HARMFUL',
   OFFENSIVE = 'OFFENSIVE',
-  INACCURATE = 'INACCURATE',
   PRIVACY = 'PRIVACY',
   OTHER = 'OTHER',
+}
+
+/** Mirrors the Prisma `ChatMessageRole` enum. */
+export enum ChatMessageRole {
+  USER = 'USER',
+  ASSISTANT = 'ASSISTANT',
 }
 
 export interface ChatReportReviewer {
@@ -23,11 +30,19 @@ export interface ChatReportReviewer {
 export interface ChatTranscriptMessage {
   id: string;
   sessionId: string;
-  role: 'USER' | 'ASSISTANT';
+  role: ChatMessageRole;
   content: string;
   createdAt: string;
 }
 
+/**
+ * A citizen's report of an AI reply.
+ *
+ * There is intentionally no reporter field: moderation is anonymous, so the API
+ * does not return `user`. Do not add one — that is a policy decision, not an
+ * oversight. The anonymity is partial though, since the reporter is always the
+ * session owner and the detail view shows their conversation.
+ */
 export interface ChatReport {
   id: string;
   sessionId: string;
