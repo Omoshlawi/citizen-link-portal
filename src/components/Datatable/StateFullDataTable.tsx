@@ -49,7 +49,9 @@ const StateFullDataTable = <TData, TValue>({
   );
 
   const renderContent = () => {
-    if (isLoading) return () => <TableSkeleton />;
+    if (isLoading) {
+      return () => <TableSkeleton />;
+    }
     if (error) {
       return () => (
         <ErrorState
@@ -63,7 +65,9 @@ const StateFullDataTable = <TData, TValue>({
     if (!props?.data?.length) {
       return () => <EmptyState title={props.title} message={nothingFoundMessage} onAdd={onAdd} />;
     }
-    if (currentView !== 'table') return views[currentView];
+    if (currentView !== 'table') {
+      return views[currentView];
+    }
     return undefined;
   };
 

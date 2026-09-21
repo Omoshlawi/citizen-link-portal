@@ -27,10 +27,10 @@ import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { AddressForm, AddressLocaleForm } from '../forms';
 import {
-  useAddressHierarchy,
-  useAddressHierarchyApi,
   useAddresses,
   useAddressesApi,
+  useAddressHierarchy,
+  useAddressHierarchyApi,
   useAddressLocales,
   useAddressLocalesApi,
 } from '../hooks';
@@ -54,7 +54,9 @@ const Detail = ({ label, value }: { label: string; value: React.ReactNode }) => 
 );
 
 const formatDate = (value?: string) => {
-  if (!value) return '—';
+  if (!value) {
+    return '—';
+  }
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
@@ -160,8 +162,11 @@ const HierarchyTab = () => {
   const setLevel = (value: string | null) => {
     setSearchParams(
       (prev) => {
-        if (value) prev.set('level', value);
-        else prev.delete('level');
+        if (value) {
+          prev.set('level', value);
+        } else {
+          prev.delete('level');
+        }
         prev.set('page', '1');
         return prev;
       },
@@ -196,7 +201,11 @@ const HierarchyTab = () => {
       onConfirm: async () => {
         try {
           await deleteHierarchyNode(node.id);
-          showNotification({ title: 'Hierarchy removed', message: 'Entry deleted', color: 'green' });
+          showNotification({
+            title: 'Hierarchy removed',
+            message: 'Entry deleted',
+            color: 'green',
+          });
           mutateAddressHierarchy();
         } catch (error) {
           const e = handleApiErrors<Record<string, string>>(error);
@@ -527,8 +536,11 @@ const LocalesTab = () => {
   const setCountry = (value: string | null) => {
     setSearchParams(
       (prev) => {
-        if (value) prev.set('country', value);
-        else prev.delete('country');
+        if (value) {
+          prev.set('country', value);
+        } else {
+          prev.delete('country');
+        }
         prev.set('page', '1');
         return prev;
       },
@@ -536,14 +548,23 @@ const LocalesTab = () => {
     );
   };
 
-  const localeQuery = useAddressLocales({ page, limit: pageSize, search, country: country ?? undefined });
+  const localeQuery = useAddressLocales({
+    page,
+    limit: pageSize,
+    search,
+    country: country ?? undefined,
+  });
   const { deleteAddressLocale, restoreAddressLocale, mutateAddressLocales } =
     useAddressLocalesApi();
 
   const handleLaunchForm = (locale?: AddressLocale) => {
     const dispose = launchWorkspace(
       <AddressLocaleForm locale={locale} closeWorkspace={() => dispose()} />,
-      { title: locale ? 'Edit address locale' : 'New address locale', width: 'wide', expandable: true }
+      {
+        title: locale ? 'Edit address locale' : 'New address locale',
+        width: 'wide',
+        expandable: true,
+      }
     );
   };
 
@@ -565,11 +586,19 @@ const LocalesTab = () => {
       onConfirm: async () => {
         try {
           await deleteAddressLocale(locale.id);
-          showNotification({ title: 'Locale deleted', message: 'Deleted successfully', color: 'green' });
+          showNotification({
+            title: 'Locale deleted',
+            message: 'Deleted successfully',
+            color: 'green',
+          });
           mutateAddressLocales();
         } catch (error) {
           const e = handleApiErrors<AddressLocaleFormData>(error);
-          showNotification({ title: 'Failed to delete locale', message: e.detail ?? 'Unknown error', color: 'red' });
+          showNotification({
+            title: 'Failed to delete locale',
+            message: e.detail ?? 'Unknown error',
+            color: 'red',
+          });
         }
       },
     });
@@ -578,11 +607,19 @@ const LocalesTab = () => {
   const handleRestore = async (locale: AddressLocale) => {
     try {
       await restoreAddressLocale(locale.id);
-      showNotification({ title: 'Locale restored', message: 'Restored successfully', color: 'green' });
+      showNotification({
+        title: 'Locale restored',
+        message: 'Restored successfully',
+        color: 'green',
+      });
       mutateAddressLocales();
     } catch (error) {
       const e = handleApiErrors<AddressLocaleFormData>(error);
-      showNotification({ title: 'Failed to restore locale', message: e.detail ?? 'Unknown error', color: 'red' });
+      showNotification({
+        title: 'Failed to restore locale',
+        message: e.detail ?? 'Unknown error',
+        color: 'red',
+      });
     }
   };
 
@@ -590,7 +627,11 @@ const LocalesTab = () => {
     <StateFullDataTable
       {...localeQuery}
       data={localeQuery.locales}
-      columns={buildLocaleColumns({ onEdit: handleLaunchForm, onDelete: handleDelete, onRestore: handleRestore })}
+      columns={buildLocaleColumns({
+        onEdit: handleLaunchForm,
+        onDelete: handleDelete,
+        onRestore: handleRestore,
+      })}
       nothingFoundMessage="No locales found. Click add to create one."
       renderExpandedRow={({ original }) => <AddressLocaleDetails locale={original} />}
       onAdd={() => handleLaunchForm()}
@@ -765,8 +806,11 @@ const AddressesTab = () => {
   const setLocation = (value: string | null) => {
     setSearchParams(
       (prev) => {
-        if (value) prev.set('location', value);
-        else prev.delete('location');
+        if (value) {
+          prev.set('location', value);
+        } else {
+          prev.delete('location');
+        }
         prev.set('page', '1');
         return prev;
       },
@@ -774,7 +818,12 @@ const AddressesTab = () => {
     );
   };
 
-  const addressQuery = useAddresses({ page, limit: pageSize, search, location: location ?? undefined });
+  const addressQuery = useAddresses({
+    page,
+    limit: pageSize,
+    search,
+    location: location ?? undefined,
+  });
   const { deleteAddress, restoreAddress, mutateAddresses } = useAddressesApi();
 
   const handleLaunchForm = (address?: Address) => {
@@ -802,11 +851,19 @@ const AddressesTab = () => {
       onConfirm: async () => {
         try {
           await deleteAddress(address.id);
-          showNotification({ title: 'Address deleted', message: 'Deleted successfully', color: 'green' });
+          showNotification({
+            title: 'Address deleted',
+            message: 'Deleted successfully',
+            color: 'green',
+          });
           mutateAddresses();
         } catch (error) {
           const e = handleApiErrors<AddressFormData>(error);
-          showNotification({ title: 'Failed to delete address', message: e.detail ?? 'Unknown error', color: 'red' });
+          showNotification({
+            title: 'Failed to delete address',
+            message: e.detail ?? 'Unknown error',
+            color: 'red',
+          });
         }
       },
     });
@@ -815,11 +872,19 @@ const AddressesTab = () => {
   const handleRestore = async (address: Address) => {
     try {
       await restoreAddress(address.id);
-      showNotification({ title: 'Address restored', message: 'Restored successfully', color: 'green' });
+      showNotification({
+        title: 'Address restored',
+        message: 'Restored successfully',
+        color: 'green',
+      });
       mutateAddresses();
     } catch (error) {
       const e = handleApiErrors<AddressFormData>(error);
-      showNotification({ title: 'Failed to restore address', message: e.detail ?? 'Unknown error', color: 'red' });
+      showNotification({
+        title: 'Failed to restore address',
+        message: e.detail ?? 'Unknown error',
+        color: 'red',
+      });
     }
   };
 
@@ -829,7 +894,11 @@ const AddressesTab = () => {
       data={addressQuery.addresses}
       nothingFoundMessage="No addresses found. Click add to create one."
       renderExpandedRow={({ original }) => <AddressDetails address={original} />}
-      columns={buildAddressColumns({ onEdit: handleLaunchForm, onDelete: handleDelete, onRestore: handleRestore })}
+      columns={buildAddressColumns({
+        onEdit: handleLaunchForm,
+        onDelete: handleDelete,
+        onRestore: handleRestore,
+      })}
       onAdd={() => handleLaunchForm()}
       pagination={{
         totalCount: addressQuery.totalCount,

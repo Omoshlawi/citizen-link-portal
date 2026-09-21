@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Alert, Button, Group, PinInput, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
-import { formatDate } from '@/lib/utils/helpers';
 import { useActiveExchange, useExchangeApi } from '@/features/exchange';
+import { formatDate } from '@/lib/utils/helpers';
 import { DocumentCase } from '../types';
 
 type ConfirmCollectionFormProps = {
@@ -24,7 +24,9 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
   const { exchange } = useActiveExchange(documentCase.foundDocumentCase?.id);
 
   const handleConfirm = async () => {
-    if (code.length !== 6) return;
+    if (code.length !== 6) {
+      return;
+    }
     setError(null);
     setIsLoading(true);
     try {
@@ -60,7 +62,8 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
           {exchange?.expiresAt && (
             <Text size="xs" c="dimmed">
               Expires {formatDate(exchange.expiresAt)}
-              {attemptsRemaining != null && ` · ${attemptsRemaining} attempt${attemptsRemaining !== 1 ? 's' : ''} remaining`}
+              {attemptsRemaining != null &&
+                ` · ${attemptsRemaining} attempt${attemptsRemaining !== 1 ? 's' : ''} remaining`}
             </Text>
           )}
         </Stack>

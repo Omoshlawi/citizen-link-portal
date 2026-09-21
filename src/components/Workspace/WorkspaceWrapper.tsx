@@ -45,15 +45,15 @@ export const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
   }, [workspaces, id]);
 
   return (
-    <Stack w={'100%'} h={'100%'} gap={0}>
+    <Stack w="100%" h="100%" gap={0}>
       <Group gap={0}>
         <Flex
           flex={1}
-          align={'center'}
-          h={'100%'}
+          align="center"
+          h="100%"
           bg={theme === 'dark' ? 'gray.8' : theme === 'light' ? 'gray.1' : 'red'}
         >
-          <Text fw={'bold'} pl={'md'}>
+          <Text fw="bold" pl="md">
             {title}
           </Text>
         </Flex>
@@ -84,10 +84,10 @@ export const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
           <Divider orientation="vertical" />
         </Group>
       </Group>
-      <Divider size={'xs'} />
+      <Divider size="xs" />
       <Flex
         flex={1}
-        direction={'column'}
+        direction="column"
         style={{
           overflow: 'auto',
           // Hide scrollbar

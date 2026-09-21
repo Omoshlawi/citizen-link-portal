@@ -15,9 +15,12 @@ export const useExchanges = (params: Record<string, any> = {}, enabled = true) =
     v: 'custom:include(verifications,station,address,createdBy,completedBy,cancelledBy)',
     ...params,
   });
-  const { data, error, isLoading, mutate: swrMutate } = useSWR<
-    APIFetchResponse<PaginatedData<DocumentExchange>>
-  >(enabled ? url : null);
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: swrMutate,
+  } = useSWR<APIFetchResponse<PaginatedData<DocumentExchange>>>(enabled ? url : null);
   return { exchanges: data?.data?.results ?? [], isLoading, error, mutate: swrMutate };
 };
 
@@ -31,7 +34,12 @@ export const useActiveExchange = (foundCaseId?: string) => {
       })
     : null;
 
-  const { data, error, isLoading, mutate: swrMutate } = useSWR<
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: swrMutate,
+  } = useSWR<
     APIFetchResponse<PaginatedData<DocumentExchange & { verifications: ExchangeVerification[] }>>
   >(url);
 
@@ -79,7 +87,12 @@ export const useActiveOutboundExchange = (claimId?: string) => {
       })
     : null;
 
-  const { data, error, isLoading, mutate: swrMutate } = useSWR<
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: swrMutate,
+  } = useSWR<
     APIFetchResponse<PaginatedData<DocumentExchange & { verifications: ExchangeVerification[] }>>
   >(url);
 
@@ -126,9 +139,12 @@ export const useDocumentExchanges = (foundCaseId?: string) => {
         v: 'custom:include(station,address,createdBy,completedBy,cancelledBy)',
       })
     : null;
-  const { data, isLoading, error, mutate: swrMutate } = useSWR<
-    APIFetchResponse<PaginatedData<DocumentExchange>>
-  >(url);
+  const {
+    data,
+    isLoading,
+    error,
+    mutate: swrMutate,
+  } = useSWR<APIFetchResponse<PaginatedData<DocumentExchange>>>(url);
   return { exchanges: data?.data?.results ?? [], isLoading, error, mutate: swrMutate };
 };
 
@@ -156,7 +172,10 @@ export const useExchangeApi = () => {
   ): Promise<DocumentExchange> => {
     try {
       const res = await apiFetch<DocumentExchange>(
-        constructUrl('/exchange/verify-code', { direction: ExchangeDirection.INBOUND, foundCaseId }),
+        constructUrl('/exchange/verify-code', {
+          direction: ExchangeDirection.INBOUND,
+          foundCaseId,
+        }),
         { method: 'POST', data }
       );
       mutate('/documents/cases');
@@ -166,10 +185,7 @@ export const useExchangeApi = () => {
     }
   };
 
-  const cancelExchange = async (
-    foundCaseId: string,
-    data: { reason: string }
-  ): Promise<void> => {
+  const cancelExchange = async (foundCaseId: string, data: { reason: string }): Promise<void> => {
     await apiFetch(
       constructUrl('/exchange/withdraw', { direction: ExchangeDirection.INBOUND, foundCaseId }),
       { method: 'POST', data }
@@ -235,20 +251,17 @@ export const useExchangeApi = () => {
     mutate('/exchange');
   };
 
-  const failDelivery = async (
-    exchangeNumber: string,
-    data: { reason: string }
-  ): Promise<void> => {
-    await apiFetch(
-      constructUrl('/exchange/fail-delivery', { exchangeNumber }),
-      { method: 'POST', data }
-    );
+  const failDelivery = async (exchangeNumber: string, data: { reason: string }): Promise<void> => {
+    await apiFetch(constructUrl('/exchange/fail-delivery', { exchangeNumber }), {
+      method: 'POST',
+      data,
+    });
     mutate('/exchange');
     mutate('/claim');
   };
 
   const getDeliveryLabelUrl = (exchangeNumber: string): string =>
-    constructUrl('/exchange/delivery-label/' + exchangeNumber, {});
+    constructUrl(`/exchange/delivery-label/${exchangeNumber}`, {});
 
   return {
     issueCode,

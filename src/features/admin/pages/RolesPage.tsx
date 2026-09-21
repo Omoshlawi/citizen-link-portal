@@ -1,16 +1,6 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import {
-  ActionIcon,
-  Badge,
-  Box,
-  Group,
-  Menu,
-  Paper,
-  Stack,
-  Text,
-  TextInput,
-} from '@mantine/core';
+import { ActionIcon, Badge, Box, Group, Menu, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
@@ -249,7 +239,9 @@ const RolesPage = () => {
             Record<string, { resourceName: string; actions: typeof original.permissions }>
           >((acc, perm) => {
             const key = perm.resource.slug;
-            if (!acc[key]) acc[key] = { resourceName: perm.resource.name, actions: [] };
+            if (!acc[key]) {
+              acc[key] = { resourceName: perm.resource.name, actions: [] };
+            }
             acc[key].actions.push(perm);
             return acc;
           }, {});

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ActionIcon,
   Badge,
@@ -26,13 +26,18 @@ import {
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
-import { ResourceForm } from '../forms/ResourceForm';
-import { RoleForm } from '../forms/RoleForm';
-import { useResources, useResourcesApi, useRoleRecords, useRoleRecordsApi } from '../hooks/useRoleRecords';
-import { Resource, RoleRecord } from '../types';
 import { BanUserForm, CreateUserForm, SetRoleForm } from '../../users/forms';
 import { useUsers, useUsersApi } from '../../users/hooks';
 import { User } from '../../users/types';
+import { ResourceForm } from '../forms/ResourceForm';
+import { RoleForm } from '../forms/RoleForm';
+import {
+  useResources,
+  useResourcesApi,
+  useRoleRecords,
+  useRoleRecordsApi,
+} from '../hooks/useRoleRecords';
+import { Resource, RoleRecord } from '../types';
 
 // ─── Users tab ────────────────────────────────────────────────────────────────
 
@@ -58,12 +63,17 @@ const UsersTab = () => {
       onConfirm: async () => {
         try {
           await removeUser(user.id);
-          showNotification({ title: 'Success', message: 'User removed successfully', color: 'green' });
+          showNotification({
+            title: 'Success',
+            message: 'User removed successfully',
+            color: 'green',
+          });
           usersAsync.mutate();
         } catch (error) {
           const e = handleApiErrors<{}>(error);
-          if (e.detail)
+          if (e.detail) {
             showNotification({ title: 'Error removing user', message: e.detail, color: 'red' });
+          }
         }
       },
     });
@@ -83,11 +93,16 @@ const UsersTab = () => {
       onConfirm: async () => {
         try {
           await revokeAllUserSessions(user.id);
-          showNotification({ title: 'Success', message: `Sessions for ${user.name} revoked`, color: 'green' });
+          showNotification({
+            title: 'Success',
+            message: `Sessions for ${user.name} revoked`,
+            color: 'green',
+          });
         } catch (error) {
           const e = handleApiErrors<{}>(error);
-          if (e.detail)
+          if (e.detail) {
             showNotification({ title: 'Error revoking sessions', message: e.detail, color: 'red' });
+          }
         }
       },
     });
@@ -95,21 +110,32 @@ const UsersTab = () => {
 
   const handleLaunchCreateUser = () => {
     const closeWorkspace = launchWorkspace(
-      <CreateUserForm closeWorkspace={() => closeWorkspace()} onSuccess={() => usersAsync.mutate()} />,
+      <CreateUserForm
+        closeWorkspace={() => closeWorkspace()}
+        onSuccess={() => usersAsync.mutate()}
+      />,
       { width: 'narrow', title: 'Add New User' }
     );
   };
 
   const handleLaunchSetRole = (user: User) => {
     const closeWorkspace = launchWorkspace(
-      <SetRoleForm user={user} closeWorkspace={() => closeWorkspace()} onSuccess={() => usersAsync.mutate()} />,
+      <SetRoleForm
+        user={user}
+        closeWorkspace={() => closeWorkspace()}
+        onSuccess={() => usersAsync.mutate()}
+      />,
       { width: 'narrow', title: `Set Role — ${user.name}` }
     );
   };
 
   const handleLaunchBanUser = (user: User) => {
     const closeWorkspace = launchWorkspace(
-      <BanUserForm user={user} closeWorkspace={() => closeWorkspace()} onSuccess={() => usersAsync.mutate()} />,
+      <BanUserForm
+        user={user}
+        closeWorkspace={() => closeWorkspace()}
+        onSuccess={() => usersAsync.mutate()}
+      />,
       { width: 'narrow', title: user.banned ? `Unban ${user.name}` : `Ban ${user.name}` }
     );
   };
@@ -173,9 +199,13 @@ const UsersTab = () => {
         accessorKey: 'banned',
         cell: ({ row: { original: user } }) =>
           user.banned ? (
-            <Badge color="red" size="xs">Banned</Badge>
+            <Badge color="red" size="xs">
+              Banned
+            </Badge>
           ) : (
-            <Badge color="green" size="xs">Active</Badge>
+            <Badge color="green" size="xs">
+              Active
+            </Badge>
           ),
       },
       {
@@ -262,7 +292,13 @@ const UsersTab = () => {
         >
           <Group gap="xl" align="flex-start" wrap="wrap">
             <Stack gap={4} miw={180}>
-              <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+              <Text
+                size="xs"
+                fw={600}
+                tt="uppercase"
+                c="dimmed"
+                style={{ letterSpacing: '0.06em' }}
+              >
                 Identity
               </Text>
               <Divider mb={4} />
@@ -271,7 +307,13 @@ const UsersTab = () => {
               <UserField label="Member since" value={new Date(user.createdAt).toDateString()} />
             </Stack>
             <Stack gap={4} miw={160}>
-              <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+              <Text
+                size="xs"
+                fw={600}
+                tt="uppercase"
+                c="dimmed"
+                style={{ letterSpacing: '0.06em' }}
+              >
                 Access
               </Text>
               <Divider mb={4} />
@@ -284,11 +326,21 @@ const UsersTab = () => {
             </Stack>
             {user.banned && (
               <Stack gap={4} miw={200}>
-                <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+                <Text
+                  size="xs"
+                  fw={600}
+                  tt="uppercase"
+                  c="dimmed"
+                  style={{ letterSpacing: '0.06em' }}
+                >
                   Ban Details
                 </Text>
                 <Divider mb={4} />
-                <UserField label="Reason" value={user.banReason ?? 'No reason provided'} valueColor="red" />
+                <UserField
+                  label="Reason"
+                  value={user.banReason ?? 'No reason provided'}
+                  valueColor="red"
+                />
                 {user.banExpires && (
                   <UserField
                     label="Expires"
@@ -341,7 +393,11 @@ const RolesTab = () => {
           mutateRoles();
         } catch (error) {
           const e = handleApiErrors(error);
-          showNotification({ title: 'Error', message: e.detail || 'Failed to delete', color: 'red' });
+          showNotification({
+            title: 'Error',
+            message: e.detail || 'Failed to delete',
+            color: 'red',
+          });
         }
       },
     });
@@ -398,8 +454,12 @@ const RolesTab = () => {
         accessorKey: 'name',
         cell: ({ row: { original } }) => (
           <Stack gap={0}>
-            <Text size="sm" fw={600}>{original.name}</Text>
-            <Text size="xs" c="dimmed" ff="monospace">{original.slug}</Text>
+            <Text size="sm" fw={600}>
+              {original.name}
+            </Text>
+            <Text size="xs" c="dimmed" ff="monospace">
+              {original.slug}
+            </Text>
           </Stack>
         ),
       },
@@ -408,9 +468,13 @@ const RolesTab = () => {
         id: 'type',
         cell: ({ row: { original } }) =>
           !original.canDelete ? (
-            <Badge size="xs" variant="dot" color="gray">System</Badge>
+            <Badge size="xs" variant="dot" color="gray">
+              System
+            </Badge>
           ) : (
-            <Badge size="xs" variant="dot" color="blue">Custom</Badge>
+            <Badge size="xs" variant="dot" color="blue">
+              Custom
+            </Badge>
           ),
       },
       {
@@ -425,9 +489,13 @@ const RolesTab = () => {
         accessorKey: 'voided',
         cell: ({ row: { original } }) =>
           original.voided ? (
-            <Badge size="xs" color="red">Voided</Badge>
+            <Badge size="xs" color="red">
+              Voided
+            </Badge>
           ) : (
-            <Badge size="xs" color="green">Active</Badge>
+            <Badge size="xs" color="green">
+              Active
+            </Badge>
           ),
       },
       {
@@ -444,7 +512,10 @@ const RolesTab = () => {
             <Menu.Dropdown>
               <Menu.Label>Actions</Menu.Label>
               <Menu.Divider />
-              <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
+              <SystemAuthorized
+                permissions={{ setting: ['manage-system'] }}
+                unauthorizedAction={{ type: 'hide' }}
+              >
                 <Menu.Item
                   leftSection={<TablerIcon name="edit" size={14} />}
                   onClick={() => handleLaunchFormWorkspace(original)}
@@ -453,7 +524,10 @@ const RolesTab = () => {
                 </Menu.Item>
               </SystemAuthorized>
               {!original.voided && original.canDelete && (
-                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
+                <SystemAuthorized
+                  permissions={{ setting: ['manage-system'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
                   <Menu.Item
                     color="red"
                     leftSection={<TablerIcon name="trash" size={14} />}
@@ -464,7 +538,10 @@ const RolesTab = () => {
                 </SystemAuthorized>
               )}
               {original.voided && (
-                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
+                <SystemAuthorized
+                  permissions={{ setting: ['manage-system'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
                   <Menu.Item
                     color="green"
                     leftSection={<TablerIcon name="history" size={14} />}
@@ -502,7 +579,9 @@ const RolesTab = () => {
           Record<string, { resourceName: string; actions: typeof original.permissions }>
         >((acc, perm) => {
           const key = perm.resource.slug;
-          if (!acc[key]) acc[key] = { resourceName: perm.resource.name, actions: [] };
+          if (!acc[key]) {
+            acc[key] = { resourceName: perm.resource.name, actions: [] };
+          }
           acc[key].actions.push(perm);
           return acc;
         }, {});
@@ -510,23 +589,37 @@ const RolesTab = () => {
         return (
           <Paper p="sm">
             <Stack gap="xs">
-              <Text size="sm" fw={600}>{original.name} Permissions</Text>
+              <Text size="sm" fw={600}>
+                {original.name} Permissions
+              </Text>
               {original.permissions.length === 0 ? (
-                <Text size="sm" c="dimmed">No permissions assigned.</Text>
+                <Text size="sm" c="dimmed">
+                  No permissions assigned.
+                </Text>
               ) : (
                 Object.entries(permTree).map(([resource, node]) => (
                   <Box key={resource}>
                     <Group gap="xs">
-                      <Text size="sm" c="dimmed">├─</Text>
-                      <Badge variant="default" color="gray" size="xs">{node.resourceName}</Badge>
-                      <Text size="xs" ff="monospace" c="dimmed">{resource}</Text>
+                      <Text size="sm" c="dimmed">
+                        ├─
+                      </Text>
+                      <Badge variant="default" color="gray" size="xs">
+                        {node.resourceName}
+                      </Badge>
+                      <Text size="xs" ff="monospace" c="dimmed">
+                        {resource}
+                      </Text>
                     </Group>
                     <Stack gap={4} pl="lg" mt={4}>
                       {node.actions.map((perm) => (
                         <Group key={perm.id} gap="xs">
-                          <Text size="sm" c="dimmed">└─</Text>
+                          <Text size="sm" c="dimmed">
+                            └─
+                          </Text>
                           <Text size="sm">{perm.resourceAction.name}</Text>
-                          <Text size="xs" ff="monospace" c="dimmed">{perm.resourceAction.slug}</Text>
+                          <Text size="xs" ff="monospace" c="dimmed">
+                            {perm.resourceAction.slug}
+                          </Text>
                         </Group>
                       ))}
                     </Stack>
@@ -578,7 +671,11 @@ const ResourcesTab = () => {
           mutateResources();
         } catch (error) {
           const e = handleApiErrors(error);
-          showNotification({ title: 'Error', message: e.detail || 'Failed to delete', color: 'red' });
+          showNotification({
+            title: 'Error',
+            message: e.detail || 'Failed to delete',
+            color: 'red',
+          });
         }
       },
     });
@@ -635,8 +732,12 @@ const ResourcesTab = () => {
         accessorKey: 'name',
         cell: ({ row: { original } }) => (
           <Stack gap={0}>
-            <Text size="sm" fw={600}>{original.name}</Text>
-            <Text size="xs" c="dimmed" ff="monospace">{original.slug}</Text>
+            <Text size="sm" fw={600}>
+              {original.name}
+            </Text>
+            <Text size="xs" c="dimmed" ff="monospace">
+              {original.slug}
+            </Text>
           </Stack>
         ),
       },
@@ -645,9 +746,13 @@ const ResourcesTab = () => {
         id: 'type',
         cell: ({ row: { original } }) =>
           original.isBuiltIn ? (
-            <Badge size="xs" variant="dot" color="gray">Built-in</Badge>
+            <Badge size="xs" variant="dot" color="gray">
+              Built-in
+            </Badge>
           ) : (
-            <Badge size="xs" variant="dot" color="blue">Custom</Badge>
+            <Badge size="xs" variant="dot" color="blue">
+              Custom
+            </Badge>
           ),
       },
       {
@@ -662,9 +767,13 @@ const ResourcesTab = () => {
         accessorKey: 'voided',
         cell: ({ row: { original } }) =>
           original.voided ? (
-            <Badge size="xs" color="red">Voided</Badge>
+            <Badge size="xs" color="red">
+              Voided
+            </Badge>
           ) : (
-            <Badge size="xs" color="green">Active</Badge>
+            <Badge size="xs" color="green">
+              Active
+            </Badge>
           ),
       },
       {
@@ -681,7 +790,10 @@ const ResourcesTab = () => {
             <Menu.Dropdown>
               <Menu.Label>Actions</Menu.Label>
               <Menu.Divider />
-              <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
+              <SystemAuthorized
+                permissions={{ setting: ['manage-system'] }}
+                unauthorizedAction={{ type: 'hide' }}
+              >
                 <Menu.Item
                   leftSection={<TablerIcon name="edit" size={14} />}
                   onClick={() => handleLaunchFormWorkspace(original)}
@@ -690,7 +802,10 @@ const ResourcesTab = () => {
                 </Menu.Item>
               </SystemAuthorized>
               {!original.voided && !original.isBuiltIn && (
-                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
+                <SystemAuthorized
+                  permissions={{ setting: ['manage-system'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
                   <Menu.Item
                     color="red"
                     leftSection={<TablerIcon name="trash" size={14} />}
@@ -701,7 +816,10 @@ const ResourcesTab = () => {
                 </SystemAuthorized>
               )}
               {original.voided && (
-                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
+                <SystemAuthorized
+                  permissions={{ setting: ['manage-system'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
                   <Menu.Item
                     color="green"
                     leftSection={<TablerIcon name="history" size={14} />}
@@ -737,20 +855,34 @@ const ResourcesTab = () => {
       renderExpandedRow={({ original }) => (
         <Paper p="sm">
           <Stack gap="xs">
-            <Text size="sm" fw={600}>{original.name} Actions</Text>
+            <Text size="sm" fw={600}>
+              {original.name} Actions
+            </Text>
             {original.actions.length === 0 ? (
-              <Text size="sm" c="dimmed">No actions defined.</Text>
+              <Text size="sm" c="dimmed">
+                No actions defined.
+              </Text>
             ) : (
               original.actions.map((action) => (
                 <Box key={action.id}>
                   <Group gap="xs">
-                    <Text size="sm" c="dimmed">└─</Text>
+                    <Text size="sm" c="dimmed">
+                      └─
+                    </Text>
                     <Text size="sm">{action.name}</Text>
-                    <Text size="xs" ff="monospace" c="dimmed">{action.slug}</Text>
+                    <Text size="xs" ff="monospace" c="dimmed">
+                      {action.slug}
+                    </Text>
                     {action.isBuiltIn && (
-                      <Badge size="xs" variant="dot" color="gray">Built-in</Badge>
+                      <Badge size="xs" variant="dot" color="gray">
+                        Built-in
+                      </Badge>
                     )}
-                    {action.voided && <Badge size="xs" color="red">Voided</Badge>}
+                    {action.voided && (
+                      <Badge size="xs" color="red">
+                        Voided
+                      </Badge>
+                    )}
                   </Group>
                 </Box>
               ))

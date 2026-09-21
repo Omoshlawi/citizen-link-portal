@@ -6,7 +6,9 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   server: {
     cors: true,
-    // port: 3000,
+    // Pinned so the portal stops colliding with the landing site, which also
+    // takes Vite's default 5173. FRONTEND_URL must match this in dev.
+    port: 3000,
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:2000',

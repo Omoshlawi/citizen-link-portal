@@ -4,7 +4,11 @@ import { Link } from 'react-router-dom';
 import { Anchor, Badge, Group, Stack, Text, Title } from '@mantine/core';
 import { StateFullDataTable, StatusBadge } from '@/components';
 import { useDocumentCases } from '@/features/cases/hooks/useDocumentCases';
-import { DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '@/features/cases/types';
+import {
+  DocumentCase,
+  FoundDocumentCaseStatus,
+  LostDocumentCaseStatus,
+} from '@/features/cases/types';
 
 const columns: ColumnDef<DocumentCase>[] = [
   {
@@ -20,17 +24,27 @@ const columns: ColumnDef<DocumentCase>[] = [
     header: 'Type',
     id: 'caseType',
     cell: ({ row: { original: c } }) => {
-      if (c.lostDocumentCase) return <Badge color="blue" variant="light" size="sm">Lost</Badge>;
-      if (c.foundDocumentCase) return <Badge color="teal" variant="light" size="sm">Found</Badge>;
+      if (c.lostDocumentCase) {
+        return (
+          <Badge color="blue" variant="light" size="sm">
+            Lost
+          </Badge>
+        );
+      }
+      if (c.foundDocumentCase) {
+        return (
+          <Badge color="teal" variant="light" size="sm">
+            Found
+          </Badge>
+        );
+      }
       return null;
     },
   },
   {
     header: 'Document Type',
     id: 'documentType',
-    cell: ({ row: { original: c } }) => (
-      <Text size="sm">{c.document?.type?.name ?? '—'}</Text>
-    ),
+    cell: ({ row: { original: c } }) => <Text size="sm">{c.document?.type?.name ?? '—'}</Text>,
   },
   {
     header: 'Status',
@@ -70,7 +84,9 @@ const UserReportedCases: React.FC<UserReportedCasesProps> = ({ userId }) => {
       <Group justify="space-between">
         <Stack gap={2}>
           <Title order={5}>Reported Cases</Title>
-          <Text size="xs" c="dimmed">Document cases submitted by this user</Text>
+          <Text size="xs" c="dimmed">
+            Document cases submitted by this user
+          </Text>
         </Stack>
       </Group>
       <StateFullDataTable

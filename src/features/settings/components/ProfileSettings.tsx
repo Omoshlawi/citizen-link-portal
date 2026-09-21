@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Alert, Avatar, Box, Button, Divider, Group, Stack, Text, TextInput } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { authClient } from '@/lib/api';
 import { TablerIcon } from '@/components';
+import { authClient } from '@/lib/api';
 import { getNameInitials } from '@/lib/utils';
 
 const ProfileSchema = z.object({
@@ -40,7 +40,9 @@ const ProfileSettings = () => {
   const onSubmit = async (data: ProfileFormValues) => {
     try {
       const { error } = await authClient.updateUser({ name: data.name });
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
       showNotification({
         title: 'Profile updated',
         message: 'Your profile information has been saved.',
@@ -58,7 +60,9 @@ const ProfileSettings = () => {
   const onChangeEmail = async (data: ChangeEmailFormValues) => {
     try {
       const { error } = await authClient.changeEmail({ newEmail: data.newEmail });
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
       setEmailChangeSent(data.newEmail);
       emailForm.reset();
     } catch (error: any) {
@@ -170,10 +174,7 @@ const ProfileSettings = () => {
           </Box>
 
           {emailChangeSent ? (
-            <Alert
-              color="civicBlue"
-              icon={<TablerIcon name="mailCheck" size={16} />}
-            >
+            <Alert color="civicBlue" icon={<TablerIcon name="mailCheck" size={16} />}>
               A verification link has been sent to{' '}
               <Text component="span" fw={600} size="sm">
                 {emailChangeSent}
@@ -184,7 +185,13 @@ const ProfileSettings = () => {
                 size="xs"
                 c="civicBlue.6"
                 mt={8}
-                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, display: 'block' }}
+                style={{
+                  cursor: 'pointer',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  display: 'block',
+                }}
                 onClick={() => setEmailChangeSent(null)}
               >
                 Send to a different address

@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Alert, Box, Button, Divider, Group, PasswordInput, Stack } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { authClient } from '@/lib/api';
 import { TablerIcon } from '@/components';
+import { authClient } from '@/lib/api';
 
 const PasswordSchema = z
   .object({
@@ -33,7 +33,9 @@ const PasswordSettings = () => {
         currentPassword: data.currentPassword,
         revokeOtherSessions: true,
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
       showNotification({
         title: 'Password changed',
         message: 'Your password has been updated and other sessions have been signed out.',

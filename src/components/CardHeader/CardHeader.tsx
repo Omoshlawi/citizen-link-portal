@@ -7,10 +7,10 @@ type CardHeaderProps = PropsWithChildren<{
 
 const CardHeader: React.FC<CardHeaderProps> = ({ title, children }) => {
   return (
-    <Paper px={'xs'}>
-      <Flex align={'center'}>
-        <Text >{title}</Text>
-        <Flex flex={1} bg={'red'} />
+    <Paper px="xs">
+      <Flex align="center">
+        <Text>{title}</Text>
+        <Flex flex={1} bg="red" />
         <Group>{children}</Group>
       </Flex>
     </Paper>

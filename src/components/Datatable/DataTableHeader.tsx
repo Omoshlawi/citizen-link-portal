@@ -16,7 +16,9 @@ const DataTableHeader = <TData,>({
   actions,
   withColumnViewOptions = true,
 }: DataTableHeaderProps<TData>) => {
-  if (!title && !actions && !withColumnViewOptions) return null;
+  if (!title && !actions && !withColumnViewOptions) {
+    return null;
+  }
 
   return (
     <Flex mb="md" gap="sm" align="center" justify="space-between" wrap="wrap">

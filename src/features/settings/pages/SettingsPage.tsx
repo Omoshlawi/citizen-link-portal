@@ -10,8 +10,12 @@ const SettingsPage = () => {
   const location = useLocation();
 
   const getActiveTab = () => {
-    if (location.pathname.includes('change-password')) return 'password';
-    if (location.pathname.includes('two-factor')) return 'security';
+    if (location.pathname.includes('change-password')) {
+      return 'password';
+    }
+    if (location.pathname.includes('two-factor')) {
+      return 'security';
+    }
     return 'profile';
   };
 
@@ -91,9 +95,7 @@ const SettingsPage = () => {
                     active={active}
                     color="civicBlue"
                     fw={active ? 600 : 400}
-                    leftSection={
-                      <TablerIcon name={icon} size={16} stroke={active ? 2 : 1.5} />
-                    }
+                    leftSection={<TablerIcon name={icon} size={16} stroke={active ? 2 : 1.5} />}
                   />
                 );
               })}

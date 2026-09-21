@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { Session, TokenPair, User } from "../types";
+import { create } from 'zustand';
+import { Session, TokenPair, User } from '../types';
 
 export type SessionStore = {
   session: Session;
@@ -24,7 +24,7 @@ export const useSessionStore = create<SessionStore>((set) => ({
    * Updates the user object within the session.
    */
   setSessionUser: (user: User) =>
-    set((state) => ({ ...state, session: { ...state.session, user: user } })),
+    set((state) => ({ ...state, session: { ...state.session, user } })),
   /**
    * Updates the token object within the session and optionally triggers caching logic.
    */

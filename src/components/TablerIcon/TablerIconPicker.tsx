@@ -24,7 +24,9 @@ const TablerIconPicker: React.FC<TablerIconPickerProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState<string>(initialIcon ?? '');
   const allIconNames = useMemo(() => {
-    if (typeof renderTriggerComponent !== 'function') return [];
+    if (typeof renderTriggerComponent !== 'function') {
+      return [];
+    }
     return getAllTablerIconNames();
   }, [renderTriggerComponent]);
 
@@ -43,7 +45,9 @@ const TablerIconPicker: React.FC<TablerIconPickerProps> = ({
   const totalPages = Math.ceil(filteredIconNames.length / ITEMS_PER_PAGE);
 
   const actions = useMemo(() => {
-    if (!paginatedItems.length) return <Spotlight.Empty>Nothing found...</Spotlight.Empty>;
+    if (!paginatedItems.length) {
+      return <Spotlight.Empty>Nothing found...</Spotlight.Empty>;
+    }
     return paginatedItems.map((name) => (
       <Spotlight.Action
         key={name}
@@ -61,14 +65,16 @@ const TablerIconPicker: React.FC<TablerIconPickerProps> = ({
     ));
   }, [paginatedItems, onIconSelect]);
 
-  if (typeof renderTriggerComponent !== 'function') return null;
+  if (typeof renderTriggerComponent !== 'function') {
+    return null;
+  }
 
   return (
     <>
       {renderTriggerComponent({ onTrigger: spotlight.open })}
       <Spotlight.Root
         scrollable
-        maxHeight={'80vh'}
+        maxHeight="80vh"
         query={searchQuery}
         onQueryChange={setSearchQuery}
         onSpotlightClose={() => setActivePage(1)} // Reset page on close for better UX

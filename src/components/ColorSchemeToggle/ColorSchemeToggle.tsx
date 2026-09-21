@@ -26,8 +26,8 @@ export function ColorSchemeToggle() {
       variant="light"
       aria-label="Theme Settings"
       onClick={toggleTheme}
-      size={'lg'}
-      radius={'xl'}
+      size="lg"
+      radius="xl"
     >
       {colorScheme === 'dark' && <IconMoonFilled stroke={1.5} />}
       {colorScheme === 'light' && <IconBrightnessDownFilled stroke={1.5} />}

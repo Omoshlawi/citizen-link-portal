@@ -36,7 +36,7 @@ const useLoadInitialAuthState = () => {
             session: {
               isAuthenticated: true,
               user,
-              token: token,
+              token,
               isGuestUser: false,
             },
           });

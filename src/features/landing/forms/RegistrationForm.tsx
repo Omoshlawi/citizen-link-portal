@@ -2,10 +2,21 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Alert, Box, Button, Flex, PasswordInput, Stack, Text, TextInput, ThemeIcon, Title } from '@mantine/core';
+import {
+  Alert,
+  Box,
+  Button,
+  Flex,
+  PasswordInput,
+  Stack,
+  Text,
+  TextInput,
+  ThemeIcon,
+  Title,
+} from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { authClient, handleApiErrors } from '@/lib/api';
 import { TablerIcon } from '@/components';
+import { authClient, handleApiErrors } from '@/lib/api';
 import { RegistrationFormData } from '../types';
 import { RegistrationValidationSchema } from '../utils/validation';
 
@@ -43,10 +54,11 @@ const RegistrationForm = () => {
           message: e.detail,
           color: 'red',
         });
-      } else
+      } else {
         Object.entries(e).forEach(([key, val]) =>
           form.setError(key as keyof RegistrationFormData, { message: val })
         );
+      }
     }
   };
 
@@ -90,12 +102,12 @@ const RegistrationForm = () => {
   }
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
-      <Stack gap={'md'}>
+      <Stack gap="md">
         <Box>
           <Text variant="gradient" size="xl" mb="md" style={{ textWrap: 'wrap' }} fw={700}>
             Sign Up
           </Text>
-          <Text c={'gray'}>Enter your information to create an account</Text>
+          <Text c="gray">Enter your information to create an account</Text>
         </Box>
         <Controller
           control={form.control}
@@ -164,12 +176,12 @@ const RegistrationForm = () => {
         <Button type="submit" loading={form.formState.isSubmitting} variant="gradient">
           Register
         </Button>
-        <Flex justify={'flex-start'} align={'center'}>
+        <Flex justify="flex-start" align="center">
           <Text>Already have an account?</Text>
           <Link
-            to={`/login${callbackUrl ? '?callbackUrl=' + encodeURIComponent(callbackUrl) : ''}`}
+            to={`/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
           >
-            <Button variant="transparent" p={'xs'}>
+            <Button variant="transparent" p="xs">
               Sign in
             </Button>
           </Link>

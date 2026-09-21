@@ -6,7 +6,7 @@ import { decodeJWTtoken, SESSION_TOKEN_KEY } from '../utils';
 
 const loginUser = async (data: LoginFormData) => {
   const resp = await apiFetch<{ user: User; token: TokenPair }>('/auth/signin/credentials', {
-    data: data,
+    data,
     method: 'POST',
   });
   const responseData = resp.data;
@@ -25,7 +25,7 @@ const loginUser = async (data: LoginFormData) => {
 };
 const registerUser = async (data: RegistrationFormData) => {
   const resp = await apiFetch<{ user: User; token: TokenPair }>('/auth/signup', {
-    data: data,
+    data,
     method: 'POST',
   });
   const responseData = resp.data;

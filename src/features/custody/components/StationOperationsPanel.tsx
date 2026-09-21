@@ -29,11 +29,10 @@ export const StationOperationsPanel: React.FC<StationOperationsPanelProps> = ({ 
     [operationTypes, stationOpTypes]
   );
 
-  const handleToggle = async (
-    stationOp: StationOperationType | null,
-    isEnabled: boolean
-  ) => {
-    if (!stationOp) return;
+  const handleToggle = async (stationOp: StationOperationType | null, isEnabled: boolean) => {
+    if (!stationOp) {
+      return;
+    }
     try {
       await updateStationOperationType(station.id, stationOp.id, { isEnabled });
       void mutate();
@@ -47,7 +46,9 @@ export const StationOperationsPanel: React.FC<StationOperationsPanelProps> = ({ 
     return (
       <Group py="sm" justify="center">
         <Loader size="xs" />
-        <Text size="sm" c="dimmed">Loading operations…</Text>
+        <Text size="sm" c="dimmed">
+          Loading operations…
+        </Text>
       </Group>
     );
   }
@@ -74,7 +75,9 @@ export const StationOperationsPanel: React.FC<StationOperationsPanelProps> = ({ 
         {rows.map(({ operationType: ot, stationOp }) => (
           <Table.Tr key={ot.id}>
             <Table.Td>
-              <Text size="sm" fw={500}>{ot.name}</Text>
+              <Text size="sm" fw={500}>
+                {ot.name}
+              </Text>
             </Table.Td>
             <Table.Td>
               <Badge variant="light" color="gray" size="xs" ff="monospace">
@@ -83,9 +86,21 @@ export const StationOperationsPanel: React.FC<StationOperationsPanelProps> = ({ 
             </Table.Td>
             <Table.Td>
               <Group gap={4}>
-                {ot.isHighPrivilege && <Badge size="xs" color="red">High Privilege</Badge>}
-                {ot.isFinalOperation && <Badge size="xs" color="orange">Final</Badge>}
-                {ot.requiresNotes && <Badge size="xs" color="gray">Req. Notes</Badge>}
+                {ot.isHighPrivilege && (
+                  <Badge size="xs" color="red">
+                    High Privilege
+                  </Badge>
+                )}
+                {ot.isFinalOperation && (
+                  <Badge size="xs" color="orange">
+                    Final
+                  </Badge>
+                )}
+                {ot.requiresNotes && (
+                  <Badge size="xs" color="gray">
+                    Req. Notes
+                  </Badge>
+                )}
               </Group>
             </Table.Td>
             <Table.Td>
@@ -97,7 +112,9 @@ export const StationOperationsPanel: React.FC<StationOperationsPanelProps> = ({ 
                   color="civicGreen"
                 />
               ) : (
-                <Text size="xs" c="dimmed">Not linked</Text>
+                <Text size="xs" c="dimmed">
+                  Not linked
+                </Text>
               )}
             </Table.Td>
           </Table.Tr>
