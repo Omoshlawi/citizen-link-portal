@@ -1,3 +1,4 @@
+import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import {
   AboutUsPage,
   ChangeEmailVerifyPage,
@@ -5,15 +6,20 @@ import {
   ForgotPasswordPage,
   HowItWorksPage,
   LoginPage,
-  RegisterPage,
+  // RegisterPage, // see the commented-out /register route below
   ResetPasswordPage,
   TwoFactorVerifyPage,
   VerifyEmailPage,
 } from '@/features/landing/pages';
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import { AddressManagementPage } from './features/addresses/pages';
-import { DocumentTypesPage, IAMPage, SystemSettingsPage, TransitionReasonsPage } from './features/admin/pages';
+import {
+  DocumentTypesPage,
+  IAMPage,
+  SystemSettingsPage,
+  TransitionReasonsPage,
+} from './features/admin/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
+import { ChatReportDetailPage, ChatReportsPage } from './features/chat-reports/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import {
   CustodyDetailPage,
@@ -24,6 +30,7 @@ import {
 } from './features/custody/pages';
 import { DashboardLayout } from './features/dashboard/components';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
+import { ConfirmDeliveryPage, OpenCasePage } from './features/deep-link/pages';
 import { AuthLayout, LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
 import { MatchDetailPage, MatchesPage } from './features/matches/pages';
@@ -34,7 +41,6 @@ import {
 } from './features/station-context/components';
 import { StationSelectionPage } from './features/station-context/pages';
 import { StatusTransitionsPage } from './features/status-transitions/pages';
-import { ChatReportDetailPage, ChatReportsPage } from './features/chat-reports/pages';
 import { TemplateDetailPage, TemplatesPage } from './features/templates/pages';
 import UiComponents from './features/ui/UiComponents';
 import { UserDetailPage } from './features/users/pages';
@@ -63,10 +69,13 @@ const router = createBrowserRouter([
     path: '/',
     element: <AuthLayout />,
     children: [
-      {
-        path: '/register',
-        element: <RegisterPage />,
-      },
+      // Self-registration is disabled in the portal: citizens sign up in the
+      // mobile app, and staff accounts are created for them and the credentials
+      // issued. Kept rather than deleted so it can be switched back on.
+      // {
+      //   path: '/register',
+      //   element: <RegisterPage />,
+      // },
       {
         path: '/login',
         element: <LoginPage />,
@@ -91,6 +100,15 @@ const router = createBrowserRouter([
         path: '/change-email-verify',
         element: <ChangeEmailVerifyPage />,
       },
+    ],
+  },
+  {
+    path: '/',
+    element: <AuthLayout />,
+    children: [
+      { path: '/open/:resource', element: <OpenCasePage /> },
+      { path: '/open/:resource/:id', element: <OpenCasePage /> },
+      { path: '/delivery/confirm', element: <ConfirmDeliveryPage /> },
     ],
   },
   {

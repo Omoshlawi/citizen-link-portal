@@ -1,3 +1,4 @@
+import { Navigate } from 'react-router-dom';
 import { Alert, Anchor, Button, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { TablerIcon } from '@/components';
 import { usePublicConfig } from '@/hooks/usePublicConfig';
@@ -8,15 +9,23 @@ type Props = {
 };
 
 /**
- * Bounce page for email CTAs. Gmail and Outlook only action http(s) links, so
- * every CTA points here and this page hands off to the app.
+ * Bounce page for email CTAs and printed labels. Gmail and Outlook only action
+ * http(s) links, so every CTA points here and this page hands off to the app.
  *
  * Deliberately shows no case, claim or payment detail: anyone holding the URL
  * can load it, so the record itself only ever renders inside the app.
  */
 const OpenInAppPage = ({ target }: Props) => {
   const { appName } = usePublicConfig();
-  const { url, label, isMobile, openApp } = target;
+  const { url, webUrl, label, isMobile, openApp } = target;
+
+  // On a desktop browser a custom scheme does nothing, so where the action can
+  // be completed on the web (the auth routes) go straight there. Tokens are
+  // time-limited and those pages act on mount, so an extra click is pure
+  // friction. `replace` keeps the back button out of a bounce loop.
+  if (url && webUrl && !isMobile) {
+    return <Navigate to={webUrl} replace />;
+  }
 
   if (!url) {
     return (
@@ -29,8 +38,8 @@ const OpenInAppPage = ({ target }: Props) => {
             This link isn&apos;t valid
           </Title>
           <Text size="sm" c="dimmed" ta="center" maw={360}>
-            It may have been mistyped or truncated by your email app. Open {appName} directly and
-            the item will be waiting for you.
+            It may have expired, or been mistyped or truncated by your email app. Request a new link
+            and try again.
           </Text>
         </Stack>
         <Anchor href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer">
@@ -65,6 +74,12 @@ const OpenInAppPage = ({ target }: Props) => {
         >
           Open in {appName}
         </Button>
+      )}
+
+      {isMobile && webUrl && (
+        <Anchor href={webUrl} size="sm">
+          Continue in this browser instead
+        </Anchor>
       )}
 
       <Alert variant="light" color="civicBlue" maw={420}>

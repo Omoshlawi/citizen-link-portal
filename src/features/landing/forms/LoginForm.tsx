@@ -137,6 +137,10 @@ const LoginForm = () => {
               Forgot password?
             </Text>
           </Link>
+          {/* Self-registration is disabled in the portal: citizens sign up in
+              the mobile app, and staff accounts are created for them and the
+              credentials issued. Kept rather than deleted so it can be
+              switched back on.
           <Flex justify="flex-end" align="center">
             <Text size="sm">Don't have an account?</Text>
             <Link
@@ -147,6 +151,7 @@ const LoginForm = () => {
               </Button>
             </Link>
           </Flex>
+          */}
         </Flex>
       </Stack>
     </form>

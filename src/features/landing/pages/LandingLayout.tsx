@@ -1,5 +1,6 @@
-import { Link, Outlet } from 'react-router-dom';
-import { AppShell, Button, Flex, Group } from '@mantine/core';
+// Link and Button are only used by the commented-out "Get Started" button below.
+import { Outlet } from 'react-router-dom';
+import { AppShell, Flex, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle, Logo } from '@/components';
 import { FooterCentered } from '@/components/Footer/Footer';
@@ -28,6 +29,10 @@ const LandingLayout = () => {
           </Group>
 
           <Group gap="sm" style={{ flex: '0 0 auto' }}>
+            {/* Self-registration is disabled in the portal: citizens sign up
+                in the mobile app, and staff accounts are created for them and
+                the credentials issued. Kept rather than deleted so it can be
+                switched back on.
             <Button
               variant="gradient"
               gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
@@ -39,6 +44,7 @@ const LandingLayout = () => {
             >
               Get Started
             </Button>
+            */}
             <ColorSchemeToggle />
           </Group>
         </Flex>
