@@ -223,6 +223,13 @@ const resolveExtractionFailure = async (
   mutate('/documents/cases');
 };
 
+const retryExtraction = async (caseId: string) => {
+  await apiFetch(`/documents/cases/${caseId}/extractions/retry`, {
+    method: 'POST',
+  });
+  mutate('/documents/cases');
+};
+
 const anonymizeCase = async (caseId: string) => {
   const result = await apiFetch<DocumentCase>(`/documents/cases/${caseId}/anonymize`, {
     method: 'POST',
@@ -245,6 +252,7 @@ export const useDocumentCaseApi = () => {
     verifyfoundDocumentCase,
     rejectFoundDocumentCase,
     resolveExtractionFailure,
+    retryExtraction,
     anonymizeCase,
   };
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Group, Menu } from '@mantine/core';
+import { Button, Group, Menu, Tooltip } from '@mantine/core';
 import { launchWorkspace, TablerIcon } from '@/components';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import AnonymizeCaseForm from '../forms/AnonymizeCaseForm';
@@ -51,6 +51,11 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   const hasUnresolvedFailure =
     latestExtraction?.extractionStatus === ExtractionStatus.FAILED &&
     !latestExtraction?.resolutionType;
+  // Only an in-flight extraction blocks verification server-side. A failed one does not —
+  // staff enter the fields by hand and verify as normal.
+  const extractionInFlight =
+    latestExtraction?.extractionStatus === ExtractionStatus.PENDING ||
+    latestExtraction?.extractionStatus === ExtractionStatus.IN_PROGRESS;
 
   const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
   const isDraft =
@@ -239,14 +244,20 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
             <>
               <Menu.Divider />
               {canVerify && (
-                <Menu.Item
-                  leftSection={<TablerIcon name="circleCheck" size={14} />}
-                  onClick={openVerify}
-                  disabled={!isSubmitted}
-                  color="civicGreen"
+                <Tooltip
+                  label="Document processing is still running — wait for it to finish, or retry it."
+                  disabled={!extractionInFlight}
+                  withArrow
                 >
-                  Verify Case
-                </Menu.Item>
+                  <Menu.Item
+                    leftSection={<TablerIcon name="circleCheck" size={14} />}
+                    onClick={openVerify}
+                    disabled={!isSubmitted || extractionInFlight}
+                    color="civicGreen"
+                  >
+                    Verify Case
+                  </Menu.Item>
+                </Tooltip>
               )}
               {canReject && (
                 <Menu.Item

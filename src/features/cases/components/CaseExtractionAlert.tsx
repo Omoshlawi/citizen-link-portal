@@ -3,6 +3,7 @@ import { launchWorkspace, TablerIcon } from '@/components';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import ResolveExtractionForm from '../forms/ResolveExtractionForm';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
+import { useRetryExtraction } from '../hooks/useRetryExtraction';
 import { AIExtraction, DocumentCase, ExtractionResolutionType } from '../types';
 
 const STEP_LABEL: Record<string, string> = {
@@ -16,7 +17,8 @@ const RESOLUTION_BADGE: Record<ExtractionResolutionType, { label: string; color:
     color: 'yellow',
   },
   [ExtractionResolutionType.SUBMIT_NEW_CASE]: { label: 'New Case Required', color: 'orange' },
-  [ExtractionResolutionType.STAFF_HANDLING]: { label: 'Staff Handling', color: 'civicBlue' },
+  // Only ever set after the work is done — staff keying the fields in is what writes it.
+  [ExtractionResolutionType.STAFF_HANDLING]: { label: 'Entered by Staff', color: 'civicBlue' },
 };
 
 interface CaseExtractionAlertProps {
@@ -26,6 +28,7 @@ interface CaseExtractionAlertProps {
 
 const CaseExtractionAlert = ({ extraction, documentCase }: CaseExtractionAlertProps) => {
   const { hasAccess: canResolve } = useUserHasSystemAccess({ documentCase: ['resolveExtraction'] });
+  const { retry, isRetrying } = useRetryExtraction(documentCase.id);
 
   // Gate on the extraction itself, not the case type. A lost case with a photo is
   // auto=false yet has a real extraction — keying off lostAuto hid those from staff
@@ -51,7 +54,7 @@ const CaseExtractionAlert = ({ extraction, documentCase }: CaseExtractionAlertPr
       [ExtractionResolutionType.SUBMIT_NEW_CASE]:
         'The citizen has been asked to submit a new case. No action required until they do.',
       [ExtractionResolutionType.STAFF_HANDLING]:
-        'Marked as staff-handled — the citizen has been told you are looking into it. If the images are readable, enter the fields manually.',
+        'The document fields were entered by staff, so processing is no longer blocking anything. The citizen was not notified — this was internal work.',
     };
 
     const openResolve = () => {
@@ -101,9 +104,9 @@ const CaseExtractionAlert = ({ extraction, documentCase }: CaseExtractionAlertPr
             </Text>
           )}
 
-          {canResolve && !isResolved && (
+          {canResolve && (
             <Group gap="xs">
-              {documentCase.document && (
+              {!isResolved && documentCase.document && (
                 <Button
                   size="xs"
                   variant="outline"
@@ -114,14 +117,29 @@ const CaseExtractionAlert = ({ extraction, documentCase }: CaseExtractionAlertPr
                   Enter Fields Manually
                 </Button>
               )}
+              {!isResolved && (
+                <Button
+                  size="xs"
+                  variant="outline"
+                  color="yellow"
+                  leftSection={<TablerIcon name="messageCircle" size={13} />}
+                  onClick={openResolve}
+                >
+                  Review &amp; Resolve
+                </Button>
+              )}
+              {/* Offered after a resolution too: staff may mark it staff-handled, then decide
+                  the failure was ours and worth another attempt. */}
               <Button
                 size="xs"
                 variant="outline"
-                color="yellow"
-                leftSection={<TablerIcon name="messageCircle" size={13} />}
-                onClick={openResolve}
+                color="gray"
+                leftSection={<TablerIcon name="refresh" size={13} />}
+                onClick={retry}
+                loading={isRetrying}
+                disabled={isRetrying}
               >
-                Review &amp; Resolve
+                Retry Processing
               </Button>
             </Group>
           )}

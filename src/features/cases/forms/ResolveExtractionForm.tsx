@@ -8,8 +8,19 @@ import { handleApiErrors } from '@/lib/api';
 import { useDocumentCaseApi } from '../hooks';
 import { DocumentCase, ExtractionResolutionType } from '../types';
 
+/**
+ * What staff may choose. Both ask the citizen for something, and both notify them.
+ *
+ * STAFF_HANDLING is absent by design — it means staff dealt with the failure themselves, and
+ * the backend writes it automatically when they key the fields in. The API rejects it here.
+ */
+const STAFF_SELECTABLE = [
+  ExtractionResolutionType.RESUBMIT_IMAGE,
+  ExtractionResolutionType.SUBMIT_NEW_CASE,
+] as const;
+
 const schema = z.object({
-  resolutionType: z.nativeEnum(ExtractionResolutionType),
+  resolutionType: z.enum(STAFF_SELECTABLE),
   resolutionMessage: z
     .string()
     .min(10, 'Message must be at least 10 characters')
@@ -29,11 +40,6 @@ const RESOLUTION_OPTIONS = [
     label: 'Submit New Case',
     description: 'User needs to start a fresh case (wrong document type submitted)',
   },
-  {
-    value: ExtractionResolutionType.STAFF_HANDLING,
-    label: 'Staff Handling',
-    description: 'Team is investigating — no action required from the user',
-  },
 ];
 
 type ResolveExtractionFormProps = {
@@ -46,7 +52,7 @@ const ResolveExtractionForm: React.FC<ResolveExtractionFormProps> = ({ documentC
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      resolutionType: ExtractionResolutionType.STAFF_HANDLING,
+      resolutionType: ExtractionResolutionType.RESUBMIT_IMAGE,
       resolutionMessage: '',
     },
   });
