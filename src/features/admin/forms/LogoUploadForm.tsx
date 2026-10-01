@@ -22,8 +22,13 @@ const TARGETS = {
   },
   printLogo: {
     setting: 'branding.logo_key',
-    label: 'Print logo',
+    label: 'Print logo (light)',
     hint: 'Logo on delivery labels and invoices — symbol, name and tagline. Transparent PNG, about 1400 × 330 px.',
+  },
+  printLogoOnDark: {
+    setting: 'branding.logo_on_dark_key',
+    label: 'Print logo (dark)',
+    hint: 'For navy or coloured backgrounds (e.g. the invoice header) — white lettering. Transparent PNG, about 1400 × 330 px.',
   },
 } as const;
 type Target = keyof typeof TARGETS;
