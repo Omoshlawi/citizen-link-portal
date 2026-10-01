@@ -23,7 +23,7 @@ const TARGETS = {
   printLogo: {
     setting: 'branding.logo_key',
     label: 'Print logo',
-    hint: 'Compact logo on delivery labels and invoices — symbol and name, no tagline. Transparent PNG, about 1300 × 300 px.',
+    hint: 'Logo on delivery labels and invoices — symbol, name and tagline. Transparent PNG, about 1400 × 330 px.',
   },
 } as const;
 type Target = keyof typeof TARGETS;
@@ -83,7 +83,7 @@ const LogoUploadForm: React.FC<LogoUploadFormProps> = ({ onClose }) => {
         uploading={loading}
         onFilesChange={setFiles}
         label="Email & print branding"
-        description="Used only in emails and printable documents. The portal, website and app use their built-in logo."
+        description="Used only in emails and printable documents. The portal, website and app use their built-in logo. Replaced by the bundled default whenever the server re-seeds on start (SEED_ON_START)."
       />
       <Group justify="flex-end">
         <Button onClick={handleUpload} disabled={files.length === 0 || loading} loading={loading}>
