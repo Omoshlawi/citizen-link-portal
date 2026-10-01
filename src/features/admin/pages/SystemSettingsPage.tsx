@@ -63,7 +63,7 @@ const SystemSettingsPage = () => {
 
   const openLogoUpload = () => {
     const id = modals.open({
-      title: 'Upload logo',
+      title: 'Email & print branding',
       children: <LogoUploadForm onClose={() => modals.close(id)} />,
     });
   };
@@ -96,7 +96,7 @@ const SystemSettingsPage = () => {
                   leftSection={<TablerIcon name="photo" size={14} />}
                   onClick={openLogoUpload}
                 >
-                  Logo
+                  Email &amp; print branding
                 </Menu.Item>
               </Menu.Dropdown>
             </Menu>

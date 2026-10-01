@@ -67,7 +67,7 @@ const AuthLayout = () => {
 
             {/* Logo */}
             <Box style={{ zIndex: 1, position: 'relative' }}>
-              <Logo />
+              <Logo onDark />
             </Box>
 
             {/* Hero text */}
