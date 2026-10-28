@@ -29,7 +29,7 @@ describe('deep link allowlist', () => {
     it.each([
       ['document-case', 'abc123', 'citizenlinkapp://document-case/abc123'],
       ['claims', 'claim-1', 'citizenlinkapp://claims/claim-1'],
-      ['match', 'match-1', 'citizenlinkapp://match/match-1'],
+      ['match', 'match-1', 'citizenlinkapp://matches/match-1'],
       ['wallet', '', 'citizenlinkapp://wallet'],
     ])('%s resolves to %s', (resource, value, expected) => {
       expect(resolveTarget(resource, value).url).toBe(expected);

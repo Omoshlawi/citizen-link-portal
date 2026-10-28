@@ -49,7 +49,7 @@ export const TARGETS: Record<string, Target> = {
     label: 'your claim',
   },
   match: {
-    appPath: (id) => `match/${id}`,
+    appPath: (id) => `matches/${id}`,
     param: 'id',
     pattern: ID_PATTERN,
     label: 'your match',
