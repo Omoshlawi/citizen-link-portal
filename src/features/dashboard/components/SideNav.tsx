@@ -169,7 +169,7 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
             }
 
             // Check if any child is active (to keep group open by default)
-            const anyChildActive = entry.items.some((item) => isActive(item.href));
+            // const anyChildActive = entry.items.some((item) => isActive(item.href));
 
             return (
               <NavLink
@@ -179,7 +179,7 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
                     {entry.label}
                   </Text>
                 }
-                defaultOpened={anyChildActive || entry.label === 'Case Management'}
+                defaultOpened
                 childrenOffset={12}
                 style={{ marginTop: i > 0 ? 4 : 0 }}
                 styles={{
