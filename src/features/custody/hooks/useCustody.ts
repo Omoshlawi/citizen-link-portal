@@ -180,7 +180,7 @@ export const initiateTransfer = (
 export const recordReturn = (foundCaseId: string, data: { stationId: string; notes?: string }) =>
   singleItemOp(foundCaseId, 'RETURN', 'stationId', data.stationId, data.notes);
 
-// ── Per-case history (CustodyDetailPage) ─────────────────────────────────────
+// ── Per-case history (case Custody tab) ──────────────────────────────────────
 
 export const useCustodyHistory = (foundCaseId?: string, params: Record<string, any> = {}) => {
   const url = constructUrl(`/document-custody/${foundCaseId}/history`, params);

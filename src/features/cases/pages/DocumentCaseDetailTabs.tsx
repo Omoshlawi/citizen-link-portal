@@ -1,5 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { Paper, Stack } from '@mantine/core';
+import { CaseCustodyPanel } from '@/features/custody/components';
+import { usePagePermissions } from '@/features/dashboard/navigation/usePagePermissions';
 import {
   AdditionalDetails,
   ContactFooter,
@@ -102,4 +104,17 @@ export const CaseExchangesTab = () => {
     return <FirstTabRedirect caseId={reportData.id} />;
   }
   return <ExchangesPanel foundCaseId={foundCaseId} />;
+};
+
+export const CaseCustodyTab = () => {
+  const { reportData } = useCaseDetail();
+  const { canAccess, isLoading } = usePagePermissions();
+  const foundCase = reportData.foundDocumentCase;
+  if (isLoading) {
+    return null;
+  }
+  if (!foundCase || !canAccess('custody')) {
+    return <FirstTabRedirect caseId={reportData.id} />;
+  }
+  return <CaseCustodyPanel foundCase={foundCase} />;
 };

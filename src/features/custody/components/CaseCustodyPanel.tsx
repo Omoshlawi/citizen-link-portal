@@ -1,54 +1,28 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { Card, Divider, Group, Loader, Stack, Text, Title } from '@mantine/core';
-import { DashboardPageHeader } from '@/components';
-import { useDocumentCase } from '@/features/cases/hooks';
-import { CustodyStatus } from '@/features/cases/types';
-import { DocumentCustodyActions } from '../components';
-import { CustodyStatusBadge } from '../components/CustodyStatusBadge';
-import { OperationHistoryTimeline } from '../components/OperationHistoryTimeline';
+import { CustodyStatus, FoundDocumentCase } from '@/features/cases/types';
+import { mutate } from '@/lib/api';
 import { useCustodyHistory } from '../hooks/useCustody';
 import { useStation } from '../hooks/useStations';
+import { CustodyStatusBadge } from './CustodyStatusBadge';
+import DocumentCustodyActions from './DocumentCustodyActions';
+import { OperationHistoryTimeline } from './OperationHistoryTimeline';
 
-/** Route param is the DocumentCase id; custody history is keyed by its FoundDocumentCase id. */
-const CustodyDetailPage: React.FC = () => {
-  const { caseId } = useParams<{ caseId: string }>();
-  const { report, isLoading: caseLoading, mutate: mutateCase } = useDocumentCase(caseId);
+interface CaseCustodyPanelProps {
+  foundCase: FoundDocumentCase;
+}
 
-  const foundCase = report?.foundDocumentCase;
-  const document = report?.document;
-
+/** Where a found document is now, and every custody operation it has been through. */
+export const CaseCustodyPanel: React.FC<CaseCustodyPanelProps> = ({ foundCase }) => {
   const {
     operations,
-    isLoading: historyLoading,
+    isLoading,
     mutate: mutateHistory,
-  } = useCustodyHistory(foundCase?.id, { orderBy: 'createdAt' });
-  const { station: currentStation } = useStation(foundCase?.currentStationId);
-
-  if (caseLoading) {
-    return (
-      <Stack align="center" py="xl">
-        <Loader />
-      </Stack>
-    );
-  }
-
-  if (!report || !foundCase) {
-    return (
-      <Text c="dimmed" ta="center" py="xl">
-        Case not found.
-      </Text>
-    );
-  }
+  } = useCustodyHistory(foundCase.id, { orderBy: 'createdAt' });
+  const { station: currentStation } = useStation(foundCase.currentStationId);
 
   return (
     <Stack gap="md">
-      <DashboardPageHeader
-        title={`Custody — ${report.caseNumber}`}
-        subTitle={document?.type?.name ?? 'Document'}
-        icon="buildingWarehouse"
-      />
-
       <Card withBorder>
         <Stack gap="xs">
           <Group justify="space-between">
@@ -60,7 +34,7 @@ const CustodyDetailPage: React.FC = () => {
                 custodyStatus={foundCase.custodyStatus ?? CustodyStatus.WITH_FINDER}
                 currentStationId={foundCase.currentStationId}
                 onActionComplete={() => {
-                  void mutateCase();
+                  void mutate('/documents/cases');
                   void mutateHistory();
                 }}
               />
@@ -70,14 +44,6 @@ const CustodyDetailPage: React.FC = () => {
           <Divider />
 
           <Group gap="xl">
-            <Stack gap={2}>
-              <Text size="xs" c="dimmed">
-                Document
-              </Text>
-              <Text size="sm" fw={600}>
-                {document?.fullName ?? '—'}
-              </Text>
-            </Stack>
             <Stack gap={2}>
               <Text size="xs" c="dimmed">
                 Current Station
@@ -101,7 +67,7 @@ const CustodyDetailPage: React.FC = () => {
       <Card withBorder>
         <Stack gap="md">
           <Title order={5}>Operation History</Title>
-          {historyLoading ? (
+          {isLoading ? (
             <Loader size="sm" />
           ) : (
             <OperationHistoryTimeline operations={operations} foundCaseId={foundCase.id} />
@@ -111,5 +77,3 @@ const CustodyDetailPage: React.FC = () => {
     </Stack>
   );
 };
-
-export default CustodyDetailPage;

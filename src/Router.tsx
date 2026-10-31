@@ -30,6 +30,7 @@ import {
 import {
   CaseAdditionalTab,
   CaseAiProcessingTab,
+  CaseCustodyTab,
   CaseDetailsTab,
   CaseDocumentTab,
   CaseExchangesTab,
@@ -48,7 +49,6 @@ import {
   ClaimsPage,
 } from './features/claims/pages';
 import {
-  CustodyDetailPage,
   CustodyListPage,
   DocumentOperationTypesPage,
   PickupStationsPage,
@@ -203,6 +203,7 @@ const router = createBrowserRouter([
                   { path: 'additional', element: <CaseAdditionalTab /> },
                   { path: 'ai-processing', element: <CaseAiProcessingTab /> },
                   { path: 'exchanges', element: <CaseExchangesTab /> },
+                  { path: 'custody', element: <CaseCustodyTab /> },
                 ],
               },
             ],
@@ -264,10 +265,7 @@ const router = createBrowserRouter([
           {
             path: 'custody',
             element: gated('custody', <Outlet />),
-            children: [
-              { index: true, element: <CustodyListPage /> },
-              { path: ':caseId', element: <CustodyDetailPage /> },
-            ],
+            children: [{ index: true, element: <CustodyListPage /> }],
           },
           {
             path: 'document-operation-types',

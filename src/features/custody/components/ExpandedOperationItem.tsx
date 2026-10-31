@@ -89,7 +89,7 @@ const ExpandedOperationItem: FC<ExpandedOperationItemProps> = ({
             </Anchor>
             <ActionIcon
               component={Link}
-              to={`/dashboard/custody/${item.foundCase.case.id}`}
+              to={`/dashboard/cases/${item.foundCase.case.id}/custody`}
               variant="subtle"
               color="civicBlue"
               size="xs"

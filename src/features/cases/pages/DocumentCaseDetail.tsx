@@ -9,6 +9,7 @@ import {
   TablerIcon,
 } from '@/components';
 import { TablerIconName } from '@/components/TablerIcon';
+import { usePagePermissions } from '@/features/dashboard/navigation/usePagePermissions';
 import { useActiveExchange } from '@/features/exchange';
 import { CaseCollectionAlert, CaseExtractionAlert, DocumentCaseActions } from '../components';
 import { useDocumentCase } from '../hooks';
@@ -34,6 +35,7 @@ const DocumentCaseDetail = () => {
   // Must be before any early returns — SWR skips fetch when foundCaseId is undefined
   const foundCaseId = reportData?.foundDocumentCase?.id;
   const { hasActiveVerification } = useActiveExchange(foundCaseId);
+  const { canAccess } = usePagePermissions();
 
   if (isLoading) {
     return <DocumentCaseDetailSkeleton />;
@@ -63,6 +65,9 @@ const DocumentCaseDetail = () => {
       : []),
     ...(!isLostCase
       ? [{ value: 'exchanges', label: 'Exchanges', icon: 'arrowsExchange' } as RouteTab]
+      : []),
+    ...(!isLostCase && canAccess('custody')
+      ? [{ value: 'custody', label: 'Custody', icon: 'buildingWarehouse' } as RouteTab]
       : []),
   ];
 

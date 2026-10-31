@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Group, Menu, Tooltip } from '@mantine/core';
 import { launchWorkspace, TablerIcon } from '@/components';
-import { usePagePermissions } from '@/features/dashboard/navigation/usePagePermissions';
 import { useActiveExchange } from '@/features/exchange';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import AnonymizeCaseForm from '../forms/AnonymizeCaseForm';
@@ -45,7 +44,6 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
     documentCase: ['resolveExtraction'],
   });
   const { hasAccess: canAnonymize } = useUserHasSystemAccess({ documentCase: ['anonymize'] });
-  const { canAccess } = usePagePermissions();
 
   const latestExtraction = documentCase.extractions
     ?.slice()
@@ -124,16 +122,6 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
           >
             Similar Cases
           </Menu.Item>
-          {reportType === 'FOUND' && canAccess('custody') && (
-            <Menu.Item
-              leftSection={<TablerIcon name="buildingWarehouse" size={14} />}
-              component={Link}
-              to={`/dashboard/custody/${documentCase.id}`}
-              color="civicBlue"
-            >
-              Custody History
-            </Menu.Item>
-          )}
           <Menu.Divider />
 
           {/* Edit actions — only available while in DRAFT */}
