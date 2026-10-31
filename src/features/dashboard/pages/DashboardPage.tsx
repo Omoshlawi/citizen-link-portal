@@ -132,7 +132,7 @@ export function DashboardPage() {
           color="civicBlue"
           count={foundSubmitted.totalCount}
           isLoading={foundSubmitted.isLoading}
-          linkTo="/dashboard/cases?type=found&status=SUBMITTED"
+          linkTo="/dashboard/cases/found?status=SUBMITTED"
         />
         <KpiCard
           label="Pending Collection"
@@ -141,7 +141,7 @@ export function DashboardPage() {
           color="teal"
           count={foundDraft.totalCount}
           isLoading={foundDraft.isLoading}
-          linkTo="/dashboard/cases?type=found&status=DRAFT"
+          linkTo="/dashboard/cases/found?status=DRAFT"
         />
         <KpiCard
           label="Active Lost Cases"
@@ -150,7 +150,7 @@ export function DashboardPage() {
           color="civicNavy"
           count={lostActive.totalCount}
           isLoading={lostActive.isLoading}
-          linkTo="/dashboard/cases?type=lost&status=SUBMITTED"
+          linkTo="/dashboard/cases/lost?status=SUBMITTED"
         />
         <KpiCard
           label="Claims Pending"

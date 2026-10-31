@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import {
   ActionIcon,
   Badge,
@@ -10,7 +10,6 @@ import {
   Menu,
   Paper,
   Stack,
-  Tabs,
   Text,
   TextInput,
 } from '@mantine/core';
@@ -19,6 +18,8 @@ import { showNotification } from '@mantine/notifications';
 import {
   DashboardPageHeader,
   launchWorkspace,
+  RouteTab,
+  RouteTabs,
   StateFullDataTable,
   SystemAuthorized,
   TablerIcon,
@@ -41,7 +42,7 @@ import { Resource, RoleRecord } from '../types';
 
 // ─── Users tab ────────────────────────────────────────────────────────────────
 
-const UsersTab = () => {
+export const UsersTab = () => {
   const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
     useTableUrlFilters({ searchDebounce: 200 });
   const offset = (page - 1) * pageSize;
@@ -367,7 +368,7 @@ const UsersTab = () => {
 
 // ─── Roles tab ────────────────────────────────────────────────────────────────
 
-const RolesTab = () => {
+export const RolesTab = () => {
   const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
     useTableUrlFilters();
   const rolesAsync = useRoleRecords({ page, limit: pageSize, search, includeVoided: true });
@@ -645,7 +646,7 @@ const RolesTab = () => {
 
 // ─── Resources tab ────────────────────────────────────────────────────────────
 
-const ResourcesTab = () => {
+export const ResourcesTab = () => {
   const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
     useTableUrlFilters();
   const resourcesAsync = useResources({ page, limit: pageSize, search, includeVoided: true });
@@ -905,46 +906,24 @@ const ResourcesTab = () => {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-const IAMPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get('tab') ?? 'users';
+const TABS: RouteTab[] = [
+  { value: 'users', label: 'Users', icon: 'users' },
+  { value: 'roles', label: 'Roles', icon: 'shieldHalf' },
+  { value: 'resources', label: 'Resources', icon: 'apiApp' },
+];
 
-  const handleTabChange = (value: string | null) => {
-    setSearchParams({ tab: value ?? 'users' });
-  };
-
-  return (
-    <Stack gap="md">
-      <DashboardPageHeader
-        title="Access Control"
-        subTitle="Manage users, roles, permissions, and resources"
-        icon="shieldLock"
-      />
-      <Tabs value={tab} onChange={handleTabChange}>
-        <Tabs.List>
-          <Tabs.Tab value="users" leftSection={<TablerIcon name="users" size={14} />}>
-            Users
-          </Tabs.Tab>
-          <Tabs.Tab value="roles" leftSection={<TablerIcon name="shieldHalf" size={14} />}>
-            Roles
-          </Tabs.Tab>
-          <Tabs.Tab value="resources" leftSection={<TablerIcon name="apiApp" size={14} />}>
-            Resources
-          </Tabs.Tab>
-        </Tabs.List>
-        <Tabs.Panel value="users" pt="md">
-          {tab === 'users' && <UsersTab />}
-        </Tabs.Panel>
-        <Tabs.Panel value="roles" pt="md">
-          {tab === 'roles' && <RolesTab />}
-        </Tabs.Panel>
-        <Tabs.Panel value="resources" pt="md">
-          {tab === 'resources' && <ResourcesTab />}
-        </Tabs.Panel>
-      </Tabs>
-    </Stack>
-  );
-};
+/** Layout route: the active tab is a child path (`/dashboard/iam/<tab>`), rendered via `<Outlet />`. */
+const IAMPage = () => (
+  <Stack gap="md">
+    <DashboardPageHeader
+      title="Access Control"
+      subTitle="Manage users, roles, permissions, and resources"
+      icon="shieldLock"
+    />
+    <RouteTabs basePath="/dashboard/iam" tabs={TABS} />
+    <Outlet />
+  </Stack>
+);
 
 export default IAMPage;
 

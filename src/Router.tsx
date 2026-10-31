@@ -11,14 +11,22 @@ import {
   TwoFactorVerifyPage,
   VerifyEmailPage,
 } from '@/features/landing/pages';
-import { AddressManagementPage } from './features/addresses/pages';
+import {
+  AddressesTab,
+  AddressManagementPage,
+  HierarchyTab,
+  LocalesTab,
+} from './features/addresses/pages';
 import {
   DocumentTypesPage,
   IAMPage,
+  ResourcesTab,
+  RolesTab,
   SystemSettingsPage,
   TransitionReasonsPage,
+  UsersTab,
 } from './features/admin/pages';
-import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
+import { DocumentCaseDetail, DocumentCasesPage, DocumentCasesTable } from './features/cases/pages';
 import { ChatReportDetailPage, ChatReportsPage } from './features/chat-reports/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import {
@@ -33,8 +41,14 @@ import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { ConfirmDeliveryPage, OpenCasePage } from './features/deep-link/pages';
 import { AuthLayout, LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
+import { RecordedMatchesTab, SemanticMatchesTab } from './features/matches/components';
 import { MatchDetailPage, MatchesPage } from './features/matches/pages';
-import { SettingsPage } from './features/settings';
+import {
+  PasswordSettings,
+  ProfileSettings,
+  SettingsPage,
+  TwoFactorSettings,
+} from './features/settings';
 import {
   StationContextRequired,
   StationSelectionLayout,
@@ -139,14 +153,26 @@ const router = createBrowserRouter([
             path: 'cases',
             element: <Outlet />,
             children: [
-              { index: true, element: <DocumentCasesPage /> },
+              {
+                element: <DocumentCasesPage />,
+                children: [
+                  { index: true, element: <DocumentCasesTable type="all" /> },
+                  { path: 'lost', element: <DocumentCasesTable type="lost" /> },
+                  { path: 'found', element: <DocumentCasesTable type="found" /> },
+                ],
+              },
               { path: ':reportId', element: <DocumentCaseDetail /> },
             ],
           },
           {
             path: 'settings',
             element: <SettingsPage />,
-            children: [{ path: ':tab', element: <SettingsPage /> }],
+            children: [
+              { index: true, element: <Navigate to="profile" replace /> },
+              { path: 'profile', element: <ProfileSettings /> },
+              { path: 'change-password', element: <PasswordSettings /> },
+              { path: 'two-factor', element: <TwoFactorSettings /> },
+            ],
           },
           {
             path: 'claims',
@@ -160,7 +186,13 @@ const router = createBrowserRouter([
             path: 'matches',
             element: <Outlet />,
             children: [
-              { index: true, element: <MatchesPage /> },
+              {
+                element: <MatchesPage />,
+                children: [
+                  { index: true, element: <RecordedMatchesTab /> },
+                  { path: 'semantic', element: <SemanticMatchesTab /> },
+                ],
+              },
               { path: ':matchId', element: <MatchDetailPage /> },
             ],
           },
@@ -195,10 +227,22 @@ const router = createBrowserRouter([
           {
             path: 'iam',
             element: <IAMPage />,
+            children: [
+              { index: true, element: <Navigate to="users" replace /> },
+              { path: 'users', element: <UsersTab /> },
+              { path: 'roles', element: <RolesTab /> },
+              { path: 'resources', element: <ResourcesTab /> },
+            ],
           },
           {
             path: 'address-management',
             element: <AddressManagementPage />,
+            children: [
+              { index: true, element: <Navigate to="hierarchy" replace /> },
+              { path: 'hierarchy', element: <HierarchyTab /> },
+              { path: 'locales', element: <LocalesTab /> },
+              { path: 'addresses', element: <AddressesTab /> },
+            ],
           },
           {
             path: 'users',

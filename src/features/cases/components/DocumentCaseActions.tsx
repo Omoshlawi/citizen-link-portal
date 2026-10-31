@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Group, Menu, Tooltip } from '@mantine/core';
 import { launchWorkspace, TablerIcon } from '@/components';
+import { useActiveExchange } from '@/features/exchange';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import AnonymizeCaseForm from '../forms/AnonymizeCaseForm';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
@@ -9,7 +10,6 @@ import ResolveExtractionForm from '../forms/ResolveExtractionForm';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
-import { useActiveExchange } from '@/features/exchange';
 import {
   CaseType,
   DocumentCase,
@@ -117,7 +117,7 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
           <Menu.Item
             leftSection={<TablerIcon name="vectorTriangle" size={14} />}
             component={Link}
-            to={`/dashboard/matches?matchesTab=semantic&semanticRef=${caseNumber}&semanticType=${reportType === 'LOST' ? 'lost' : 'found'}`}
+            to={`/dashboard/matches/semantic?semanticRef=${caseNumber}&semanticType=${reportType === 'LOST' ? 'lost' : 'found'}`}
             color="civicBlue"
           >
             Similar Cases
@@ -227,10 +227,7 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
                 color="yellow"
                 onClick={() => {
                   const close = launchWorkspace(
-                    <ResolveExtractionForm
-                      documentCase={documentCase}
-                      onClose={() => close()}
-                    />,
+                    <ResolveExtractionForm documentCase={documentCase} onClose={() => close()} />,
                     { title: 'Review Document Processing' }
                   );
                 }}

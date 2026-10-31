@@ -1,8 +1,15 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Anchor, Badge, Button, Group, Select, Stack, Tabs, Text, TextInput } from '@mantine/core';
-import { DashboardPageHeader, StateFullDataTable, StatusBadge, TablerIcon } from '@/components';
+import { Link, Outlet, useSearchParams } from 'react-router-dom';
+import { Anchor, Badge, Button, Group, Select, Stack, Text, TextInput } from '@mantine/core';
+import {
+  DashboardPageHeader,
+  RouteTab,
+  RouteTabs,
+  StateFullDataTable,
+  StatusBadge,
+  TablerIcon,
+} from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import { useDocumentTypes } from '@/features/admin/hooks/useDocumentTypes';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
@@ -16,7 +23,7 @@ import {
   LostDocumentCaseStatus,
 } from '../types';
 
-type CaseTab = 'all' | 'lost' | 'found';
+export type CaseTab = 'all' | 'lost' | 'found';
 
 const LOST_STATUS_OPTIONS = [
   { label: 'Draft', value: LostDocumentCaseStatus.DRAFT },
@@ -47,9 +54,9 @@ const CUSTODY_STATUS_OPTIONS = [
   { label: 'Disposed', value: CustodyStatus.DISPOSED },
 ];
 
-const DocumentCasesPage = () => {
+/** Case list for one tab; the tab comes from the route (`/cases`, `/cases/lost`, `/cases/found`). */
+export const DocumentCasesTable = ({ type: activeTab }: { type: CaseTab }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = (searchParams.get('type') ?? 'all') as CaseTab;
 
   const {
     page,
@@ -114,22 +121,6 @@ const DocumentCasesPage = () => {
     );
   };
 
-  const handleTabChange = (value: string | null) => {
-    setSearchParams(
-      (prev) => {
-        if (value && value !== 'all') {
-          prev.set('type', value);
-        } else {
-          prev.delete('type');
-        }
-        prev.delete('status');
-        prev.set('page', '1');
-        return prev;
-      },
-      { replace: true }
-    );
-  };
-
   const vParam =
     activeTab === 'found'
       ? 'custom:include(foundDocumentCase:include(currentStation),document:include(type),address,user,extractions)'
@@ -170,7 +161,7 @@ const DocumentCasesPage = () => {
         enableHiding: false,
         cell({ row: { original: documentCase } }) {
           return (
-            <Anchor component={Link} to={documentCase.id}>
+            <Anchor component={Link} to={`/dashboard/cases/${documentCase.id}`}>
               {documentCase.caseNumber}
             </Anchor>
           );
@@ -296,128 +287,127 @@ const DocumentCasesPage = () => {
     [activeTab]
   );
   return (
-    <Stack gap="md">
-      <DashboardPageHeader
-        title="Cases"
-        subTitle="Manage lost and found document cases"
-        icon="files"
-      />
-      <Tabs value={activeTab} onChange={handleTabChange}>
-        <Tabs.List>
-          <Tabs.Tab value="all" leftSection={<TablerIcon name="files" size={14} />}>
-            All Cases
-          </Tabs.Tab>
-          <Tabs.Tab value="lost" leftSection={<TablerIcon name="fileSearch" size={14} />}>
-            Lost
-          </Tabs.Tab>
-          <Tabs.Tab value="found" leftSection={<TablerIcon name="fileCheck" size={14} />}>
-            Found
-          </Tabs.Tab>
-        </Tabs.List>
-      </Tabs>
-      <StateFullDataTable
-        {...documentCasesAsync}
-        data={documentCasesAsync.reports}
-        columns={[...columns]}
-        renderActions={() => (
-          <>
-            <Group gap="xs" wrap="nowrap">
-              <Button
-                size="xs"
-                variant="light"
-                color="orange"
-                leftSection={<TablerIcon name="fileSearch" size={14} />}
-                onClick={() => {
-                  const dismiss = launchWorkspace(
-                    <LostDocumentCaseForm
-                      onSuccess={() => dismiss()}
-                      closeWorkspace={() => dismiss()}
-                    />,
-                    { title: 'Report Lost Document' }
-                  );
-                }}
-              >
-                Report Lost
-              </Button>
-              <Button
-                size="xs"
-                variant="light"
-                color="teal"
-                leftSection={<TablerIcon name="fileCheck" size={14} />}
-                onClick={() => {
-                  const dismiss = launchWorkspace(
-                    <FoundDocumentCaseForm
-                      onSuccess={() => dismiss()}
-                      closeWorkspace={() => dismiss()}
-                    />,
-                    { title: 'Report Found Document' }
-                  );
-                }}
-              >
-                Report Found
-              </Button>
-            </Group>
-            <TextInput
-              placeholder="Search cases..."
-              leftSection={<TablerIcon name="search" size={14} />}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+    <StateFullDataTable
+      {...documentCasesAsync}
+      data={documentCasesAsync.reports}
+      columns={[...columns]}
+      renderActions={() => (
+        <>
+          <Group gap="xs" wrap="nowrap">
+            <Button
               size="xs"
-              w={200}
-            />
-            {statusOptions && (
-              <Select
-                placeholder="Status"
-                data={statusOptions}
-                value={status}
-                onChange={setStatus}
-                size="xs"
-                clearable
-                w={140}
-              />
-            )}
+              variant="light"
+              color="orange"
+              leftSection={<TablerIcon name="fileSearch" size={14} />}
+              onClick={() => {
+                const dismiss = launchWorkspace(
+                  <LostDocumentCaseForm
+                    onSuccess={() => dismiss()}
+                    closeWorkspace={() => dismiss()}
+                  />,
+                  { title: 'Report Lost Document' }
+                );
+              }}
+            >
+              Report Lost
+            </Button>
+            <Button
+              size="xs"
+              variant="light"
+              color="teal"
+              leftSection={<TablerIcon name="fileCheck" size={14} />}
+              onClick={() => {
+                const dismiss = launchWorkspace(
+                  <FoundDocumentCaseForm
+                    onSuccess={() => dismiss()}
+                    closeWorkspace={() => dismiss()}
+                  />,
+                  { title: 'Report Found Document' }
+                );
+              }}
+            >
+              Report Found
+            </Button>
+          </Group>
+          <TextInput
+            placeholder="Search cases..."
+            leftSection={<TablerIcon name="search" size={14} />}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            size="xs"
+            w={200}
+          />
+          {statusOptions && (
             <Select
-              placeholder="Document Type"
-              data={documentTypeOptions}
-              value={documentType}
-              onChange={setDocumentType}
+              placeholder="Status"
+              data={statusOptions}
+              value={status}
+              onChange={setStatus}
               size="xs"
               clearable
-              w={160}
-              searchable
+              w={140}
             />
+          )}
+          <Select
+            placeholder="Document Type"
+            data={documentTypeOptions}
+            value={documentType}
+            onChange={setDocumentType}
+            size="xs"
+            clearable
+            w={160}
+            searchable
+          />
+          <Select
+            placeholder="AI Processing"
+            data={EXTRACTION_STATUS_OPTIONS}
+            value={extractionStatus}
+            onChange={setExtractionStatus}
+            size="xs"
+            clearable
+            w={160}
+          />
+          {activeTab === 'found' && (
             <Select
-              placeholder="AI Processing"
-              data={EXTRACTION_STATUS_OPTIONS}
-              value={extractionStatus}
-              onChange={setExtractionStatus}
+              placeholder="Custody"
+              data={CUSTODY_STATUS_OPTIONS}
+              value={custodyStatus}
+              onChange={setCustodyStatus}
               size="xs"
               clearable
-              w={160}
+              w={140}
             />
-            {activeTab === 'found' && (
-              <Select
-                placeholder="Custody"
-                data={CUSTODY_STATUS_OPTIONS}
-                value={custodyStatus}
-                onChange={setCustodyStatus}
-                size="xs"
-                clearable
-                w={140}
-              />
-            )}
-          </>
-        )}
-        pagination={{
-          totalCount: documentCasesAsync.totalCount,
-          currentPage: page,
-          pageSize,
-          onChange: setPage,
-          onPageSizeChange: setPageSize,
-        }}
-      />
-    </Stack>
+          )}
+        </>
+      )}
+      pagination={{
+        totalCount: documentCasesAsync.totalCount,
+        currentPage: page,
+        pageSize,
+        onChange: setPage,
+        onPageSizeChange: setPageSize,
+      }}
+    />
   );
 };
+
+const TABS: RouteTab[] = [
+  { value: '', label: 'All Cases', icon: 'files' },
+  { value: 'lost', label: 'Lost', icon: 'fileSearch' },
+  { value: 'found', label: 'Found', icon: 'fileCheck' },
+];
+
+/** Layout route: the tab is the path (`/dashboard/cases[/lost|/found]`), rendered via `<Outlet />`. */
+const DocumentCasesPage = () => (
+  <Stack gap="md">
+    <DashboardPageHeader
+      title="Cases"
+      subTitle="Manage lost and found document cases"
+      icon="files"
+    />
+    <RouteTabs basePath="/dashboard/cases" tabs={TABS} />
+    <Outlet />
+  </Stack>
+);
 
 export default DocumentCasesPage;

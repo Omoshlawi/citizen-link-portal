@@ -1,6 +1,6 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useSearchParams } from 'react-router-dom';
+import { Outlet, useSearchParams } from 'react-router-dom';
 import {
   ActionIcon,
   Badge,
@@ -10,7 +10,6 @@ import {
   Select,
   SimpleGrid,
   Stack,
-  Tabs,
   Text,
   TextInput,
 } from '@mantine/core';
@@ -19,6 +18,8 @@ import { showNotification } from '@mantine/notifications';
 import {
   DashboardPageHeader,
   launchWorkspace,
+  RouteTab,
+  RouteTabs,
   StateFullDataTable,
   SystemAuthorized,
   TablerIcon,
@@ -152,7 +153,7 @@ const HierarchyDetails = ({ node }: { node: AddressHierarchyNode }) => (
   </Stack>
 );
 
-const HierarchyTab = () => {
+export const HierarchyTab = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
     useTableUrlFilters();
@@ -526,7 +527,7 @@ const AddressLocaleDetails = ({ locale }: { locale: AddressLocale }) => (
   </Stack>
 );
 
-const LocalesTab = () => {
+export const LocalesTab = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
     useTableUrlFilters();
@@ -796,7 +797,7 @@ const AddressDetails = ({ address }: { address: Address }) => (
   </Stack>
 );
 
-const AddressesTab = () => {
+export const AddressesTab = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
     useTableUrlFilters();
@@ -933,45 +934,23 @@ const AddressesTab = () => {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-const AddressManagementPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get('tab') ?? 'hierarchy';
+const TABS: RouteTab[] = [
+  { value: 'hierarchy', label: 'Hierarchy', icon: 'layersLinked' },
+  { value: 'locales', label: 'Locales', icon: 'worldPin' },
+  { value: 'addresses', label: 'Addresses', icon: 'mapPin' },
+];
 
-  const handleTabChange = (value: string | null) => {
-    setSearchParams({ tab: value ?? 'hierarchy' });
-  };
-
-  return (
-    <Stack gap="md">
-      <DashboardPageHeader
-        title="Address Management"
-        subTitle="Manage addresses, hierarchy levels, and locale formats"
-        icon="mapPin"
-      />
-      <Tabs value={tab} onChange={handleTabChange}>
-        <Tabs.List>
-          <Tabs.Tab value="hierarchy" leftSection={<TablerIcon name="layersLinked" size={14} />}>
-            Hierarchy
-          </Tabs.Tab>
-          <Tabs.Tab value="locales" leftSection={<TablerIcon name="worldPin" size={14} />}>
-            Locales
-          </Tabs.Tab>
-          <Tabs.Tab value="addresses" leftSection={<TablerIcon name="mapPin" size={14} />}>
-            Addresses
-          </Tabs.Tab>
-        </Tabs.List>
-        <Tabs.Panel value="hierarchy" pt="md">
-          {tab === 'hierarchy' && <HierarchyTab />}
-        </Tabs.Panel>
-        <Tabs.Panel value="locales" pt="md">
-          {tab === 'locales' && <LocalesTab />}
-        </Tabs.Panel>
-        <Tabs.Panel value="addresses" pt="md">
-          {tab === 'addresses' && <AddressesTab />}
-        </Tabs.Panel>
-      </Tabs>
-    </Stack>
-  );
-};
+/** Layout route: the active tab is a child path (`/dashboard/address-management/<tab>`), rendered via `<Outlet />`. */
+const AddressManagementPage = () => (
+  <Stack gap="md">
+    <DashboardPageHeader
+      title="Address Management"
+      subTitle="Manage addresses, hierarchy levels, and locale formats"
+      icon="mapPin"
+    />
+    <RouteTabs basePath="/dashboard/address-management" tabs={TABS} />
+    <Outlet />
+  </Stack>
+);
 
 export default AddressManagementPage;

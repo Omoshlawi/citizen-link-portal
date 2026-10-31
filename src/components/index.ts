@@ -10,3 +10,4 @@ export * from './UserHasAccess';
 export * from './RichTextEditorInput';
 export * from './StatusBadge';
 export * from './SectionTitle';
+export * from './RouteTabs';

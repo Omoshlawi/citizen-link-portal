@@ -1,25 +1,10 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Box, Divider, Grid, NavLink, Stack, Text, Title } from '@mantine/core';
 import { DashboardPageHeader, TablerIcon } from '@/components';
-import PasswordSettings from '../components/PasswordSettings';
-import ProfileSettings from '../components/ProfileSettings';
-import TwoFactorSettings from '../components/TwoFactorSettings';
 
+/** Layout route: each section is a child path under `/dashboard/settings`. */
 const SettingsPage = () => {
   const location = useLocation();
-
-  const getActiveTab = () => {
-    if (location.pathname.includes('change-password')) {
-      return 'password';
-    }
-    if (location.pathname.includes('two-factor')) {
-      return 'security';
-    }
-    return 'profile';
-  };
-
-  const activeTab = getActiveTab();
 
   const navItems = [
     {
@@ -41,6 +26,9 @@ const SettingsPage = () => {
       href: '/dashboard/settings/two-factor',
     },
   ] as const;
+
+  const activeTab =
+    navItems.find(({ href }) => location.pathname.startsWith(href))?.value ?? 'profile';
 
   const sections: Record<string, { title: string; description: string }> = {
     profile: {
@@ -116,9 +104,7 @@ const SettingsPage = () => {
               <Divider mt="sm" />
             </Box>
 
-            {activeTab === 'profile' && <ProfileSettings />}
-            {activeTab === 'password' && <PasswordSettings />}
-            {activeTab === 'security' && <TwoFactorSettings />}
+            <Outlet />
           </Stack>
         </Grid.Col>
       </Grid>
