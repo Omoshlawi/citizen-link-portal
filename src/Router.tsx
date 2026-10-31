@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import {
   AboutUsPage,
@@ -37,6 +38,7 @@ import {
   StaffStationOperationsPage,
 } from './features/custody/pages';
 import { DashboardLayout } from './features/dashboard/components';
+import { RequirePagePermission } from './features/dashboard/navigation';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { ConfirmDeliveryPage, OpenCasePage } from './features/deep-link/pages';
 import { AuthLayout, LoginRequired } from './features/landing/components';
@@ -58,6 +60,11 @@ import { StatusTransitionsPage } from './features/status-transitions/pages';
 import { TemplateDetailPage, TemplatesPage } from './features/templates/pages';
 import UiComponents from './features/ui/UiComponents';
 import { UserDetailPage } from './features/users/pages';
+
+/** Wraps a dashboard page route in its `PAGE_PERMISSIONS` guard; child routes inherit it. */
+const gated = (page: string, element: ReactNode) => (
+  <RequirePagePermission page={page}>{element}</RequirePagePermission>
+);
 
 const router = createBrowserRouter([
   {
@@ -151,7 +158,7 @@ const router = createBrowserRouter([
           { index: true, element: <DashboardPage /> },
           {
             path: 'cases',
-            element: <Outlet />,
+            element: gated('cases', <Outlet />),
             children: [
               {
                 element: <DocumentCasesPage />,
@@ -176,7 +183,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'claims',
-            element: <Outlet />,
+            element: gated('claims', <Outlet />),
             children: [
               { index: true, element: <ClaimsPage /> },
               { path: ':claimId', element: <ClaimDetailPage /> },
@@ -184,7 +191,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'matches',
-            element: <Outlet />,
+            element: gated('matches', <Outlet />),
             children: [
               {
                 element: <MatchesPage />,
@@ -198,35 +205,41 @@ const router = createBrowserRouter([
           },
           {
             path: 'status-transitions',
-            element: <StatusTransitionsPage />,
+            element: gated('status-transitions', <StatusTransitionsPage />),
           },
           {
             path: 'custody',
-            element: <Outlet />,
+            element: gated('custody', <Outlet />),
             children: [
               { index: true, element: <CustodyListPage /> },
               { path: ':foundCaseId', element: <CustodyDetailPage /> },
             ],
           },
-          { path: 'document-operation-types', element: <DocumentOperationTypesPage /> },
-          { path: 'stations', element: <PickupStationsPage /> },
-          { path: 'operation-scope', element: <StaffStationOperationsPage /> },
+          {
+            path: 'document-operation-types',
+            element: gated('document-operation-types', <DocumentOperationTypesPage />),
+          },
+          { path: 'stations', element: gated('stations', <PickupStationsPage />) },
+          {
+            path: 'operation-scope',
+            element: gated('operation-scope', <StaffStationOperationsPage />),
+          },
           { path: 'components', element: <UiComponents /> },
           {
             path: 'document-types',
-            element: <DocumentTypesPage />,
+            element: gated('document-types', <DocumentTypesPage />),
           },
           {
             path: 'system-settings',
-            element: <SystemSettingsPage />,
+            element: gated('system-settings', <SystemSettingsPage />),
           },
           {
             path: 'status-transition-reasons',
-            element: <TransitionReasonsPage />,
+            element: gated('status-transition-reasons', <TransitionReasonsPage />),
           },
           {
             path: 'iam',
-            element: <IAMPage />,
+            element: gated('iam', <IAMPage />),
             children: [
               { index: true, element: <Navigate to="users" replace /> },
               { path: 'users', element: <UsersTab /> },
@@ -236,7 +249,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'address-management',
-            element: <AddressManagementPage />,
+            element: gated('address-management', <AddressManagementPage />),
             children: [
               { index: true, element: <Navigate to="hierarchy" replace /> },
               { path: 'hierarchy', element: <HierarchyTab /> },
@@ -246,12 +259,12 @@ const router = createBrowserRouter([
           },
           {
             path: 'users',
-            element: <Outlet />,
+            element: gated('users', <Outlet />),
             children: [{ path: ':id', element: <UserDetailPage /> }],
           },
           {
             path: 'templates',
-            element: <Outlet />,
+            element: gated('templates', <Outlet />),
             children: [
               { index: true, element: <TemplatesPage /> },
               { path: ':id', element: <TemplateDetailPage /> },
@@ -259,7 +272,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'chat-reports',
-            element: <Outlet />,
+            element: gated('chat-reports', <Outlet />),
             children: [
               { index: true, element: <ChatReportsPage /> },
               { path: ':reportId', element: <ChatReportDetailPage /> },

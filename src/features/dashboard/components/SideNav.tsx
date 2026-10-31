@@ -5,6 +5,7 @@ import { modals } from '@mantine/modals';
 import { TablerIcon, TablerIconName } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
 import { getNameInitials } from '@/lib/utils';
+import { usePagePermissions } from '../navigation';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -80,6 +81,16 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
   const location = useLocation();
   const { data: session } = authClient.useSession();
   const user = session?.user;
+  const { canAccess } = usePagePermissions();
+
+  // Gated pages stay hidden until permissions load, so forbidden links never flash.
+  const visibleNav = navConfig.flatMap<NavEntry>((entry) => {
+    if (entry.type === 'item') {
+      return canAccess(entry.href) ? [entry] : [];
+    }
+    const items = entry.items.filter((item) => canAccess(item.href));
+    return items.length > 0 ? [{ ...entry, items }] : [];
+  });
 
   function isActive(href: string) {
     const path = resolveHref(href);
@@ -88,11 +99,11 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
       : location.pathname === path || location.pathname.startsWith(`${path}/`);
   }
 
-  function renderItem(item: NavItem, index: number) {
+  function renderItem(item: NavItem) {
     const active = isActive(item.href);
     return (
       <NavLink
-        key={index}
+        key={item.href}
         component={Link}
         to={resolveHref(item.href)}
         active={active}
@@ -152,9 +163,9 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
       {/* ── Navigation ─────────────────────────────────────── */}
       <AppShell.Section grow component={ScrollArea} px={4}>
         <Stack gap={0} pt={4}>
-          {navConfig.map((entry, i) => {
+          {visibleNav.map((entry, i) => {
             if (entry.type === 'item') {
-              return renderItem(entry, i);
+              return renderItem(entry);
             }
 
             // Check if any child is active (to keep group open by default)
@@ -162,7 +173,7 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
 
             return (
               <NavLink
-                key={i}
+                key={entry.label}
                 label={
                   <Text size="xs" fw={600} tt="uppercase" style={{ letterSpacing: '0.06em' }}>
                     {entry.label}
@@ -176,7 +187,7 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
                   chevron: { color: 'var(--mantine-color-dimmed)' },
                 }}
               >
-                {entry.items.map(renderItem)}
+                {entry.items.map((item) => renderItem(item))}
               </NavLink>
             );
           })}

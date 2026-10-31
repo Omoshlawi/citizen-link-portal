@@ -1,5 +1,20 @@
-import { apiFetch, APIFetchResponse, constructUrl, mutate as globalMutate, useApi } from '@/lib/api';
-import { EffectivePermissions, Resource, ResourceAction, ResourceActionFormData, ResourceFormData, RoleFormData, RoleRecord } from '../types';
+import {
+  apiFetch,
+  APIFetchResponse,
+  authClient,
+  constructUrl,
+  mutate as globalMutate,
+  useApi,
+} from '@/lib/api';
+import {
+  EffectivePermissions,
+  Resource,
+  ResourceAction,
+  ResourceActionFormData,
+  ResourceFormData,
+  RoleFormData,
+  RoleRecord,
+} from '../types';
 
 // ─── Roles ────────────────────────────────────────────────────────────────────
 
@@ -19,9 +34,7 @@ export const useRoleRecords = (filters: Record<string, any> = {}) => {
 
 export const useRoleRecord = (id?: string) => {
   const url = constructUrl(`/roles/${id}`);
-  const { data, error, isLoading, mutate } = useApi<APIFetchResponse<RoleRecord>>(
-    id ? url : null
-  );
+  const { data, error, isLoading, mutate } = useApi<APIFetchResponse<RoleRecord>>(id ? url : null);
   return { role: data?.data, error, isLoading, mutate };
 };
 
@@ -77,9 +90,7 @@ export const useResources = (filters: Record<string, any> = {}) => {
 
 export const useResource = (id?: string) => {
   const url = constructUrl(`/roles/resources/${id}`);
-  const { data, error, isLoading, mutate } = useApi<APIFetchResponse<Resource>>(
-    id ? url : null
-  );
+  const { data, error, isLoading, mutate } = useApi<APIFetchResponse<Resource>>(id ? url : null);
   return { resource: data?.data, error, isLoading, mutate };
 };
 
@@ -90,7 +101,10 @@ export const useResourcesApi = () => {
   };
 
   const updateResource = async (id: string, payload: Partial<ResourceFormData>) => {
-    const res = await apiFetch<Resource>(`/roles/resources/${id}`, { method: 'PATCH', data: payload });
+    const res = await apiFetch<Resource>(`/roles/resources/${id}`, {
+      method: 'PATCH',
+      data: payload,
+    });
     return res.data;
   };
 
@@ -126,7 +140,9 @@ export const useResourcesApi = () => {
   };
 
   const restoreAction = async (actionId: string) => {
-    const res = await apiFetch<ResourceAction>(`/roles/actions/${actionId}/restore`, { method: 'POST' });
+    const res = await apiFetch<ResourceAction>(`/roles/actions/${actionId}/restore`, {
+      method: 'POST',
+    });
     return res.data;
   };
 
@@ -148,12 +164,15 @@ export const useResourcesApi = () => {
 // ─── Effective permissions (real-time display) ────────────────────────────────
 
 export const useMyPermissions = () => {
-  const { data, error, isLoading } = useApi<APIFetchResponse<{ permissions: EffectivePermissions }>>(
-    '/roles/my-permissions'
-  );
+  // Keyed by user so a sign-out/sign-in or impersonation never reuses another user's cache entry.
+  const { data: session, isPending } = authClient.useSession();
+  const userId = session?.user?.id;
+  const { data, error, isLoading } = useApi<
+    APIFetchResponse<{ permissions: EffectivePermissions }>
+  >(userId ? constructUrl('/roles/my-permissions', { user: userId }) : null);
   return {
     permissions: data?.data?.permissions ?? {},
     error,
-    isLoading,
+    isLoading: isPending || isLoading,
   };
 };
