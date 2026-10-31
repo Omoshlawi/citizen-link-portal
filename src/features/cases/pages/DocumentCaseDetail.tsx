@@ -1,29 +1,32 @@
-import { useParams } from 'react-router-dom';
-import { Alert, Badge, Group, Paper, Stack, Tabs, Text } from '@mantine/core';
-import { DashboardPageHeader, ErrorState, StatusBadge, TablerIcon } from '@/components';
+import { Outlet, useOutletContext, useParams } from 'react-router-dom';
+import { Alert, Badge, Group, Stack, Text } from '@mantine/core';
+import {
+  DashboardPageHeader,
+  ErrorState,
+  RouteTab,
+  RouteTabs,
+  StatusBadge,
+  TablerIcon,
+} from '@/components';
 import { TablerIconName } from '@/components/TablerIcon';
-import {
-  AdditionalDetails,
-  CaseCollectionAlert,
-  CaseExtractionAlert,
-  ContactFooter,
-  DocumentCaseActions,
-  DocumentImages,
-  DocumentInformation,
-  ExchangesPanel,
-  ExtractionInteractionsPanel,
-  LocationInformation,
-  ReportDetails,
-} from '../components';
 import { useActiveExchange } from '@/features/exchange';
+import { CaseCollectionAlert, CaseExtractionAlert, DocumentCaseActions } from '../components';
 import { useDocumentCase } from '../hooks';
-import {
-  CaseType,
-  FoundDocumentCaseStatus,
-  LostDocumentCaseStatus,
-} from '../types';
+import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
+export type CaseDetailContext = {
+  reportData: DocumentCase;
+  reportType: CaseType;
+  status: LostDocumentCaseStatus | FoundDocumentCaseStatus;
+  hasExtractions: boolean;
+  foundCaseId?: string;
+};
+
+/** Read the case loaded by the `DocumentCaseDetail` layout from inside a tab route. */
+export const useCaseDetail = () => useOutletContext<CaseDetailContext>();
+
+/** Layout route: each tab is a child path under `/dashboard/cases/:reportId`. */
 const DocumentCaseDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
   const { error, isLoading, report: reportData } = useDocumentCase(reportId);
@@ -47,6 +50,29 @@ const DocumentCaseDetail = () => {
     ? reportData.lostDocumentCase?.status || LostDocumentCaseStatus.SUBMITTED
     : reportData.foundDocumentCase?.status || FoundDocumentCaseStatus.DRAFT;
   const pointAwarded = reportData.foundDocumentCase?.pointAwarded ?? 0;
+  const hasExtractions = (reportData.extractions?.length ?? 0) > 0;
+
+  const tabs: RouteTab[] = [
+    { value: 'document', label: 'Document', icon: 'id' },
+    { value: 'images', label: 'Images', icon: 'photo' },
+    { value: 'location', label: 'Location', icon: 'mapPin' },
+    { value: 'details', label: 'Report Details', icon: 'infoCircle' },
+    { value: 'additional', label: 'Additional', icon: 'fileText' },
+    ...(hasExtractions
+      ? [{ value: 'ai-processing', label: 'AI Processing', icon: 'robot' } as RouteTab]
+      : []),
+    ...(!isLostCase
+      ? [{ value: 'exchanges', label: 'Exchanges', icon: 'arrowsExchange' } as RouteTab]
+      : []),
+  ];
+
+  const context: CaseDetailContext = {
+    reportData,
+    reportType,
+    status,
+    hasExtractions,
+    foundCaseId,
+  };
 
   return (
     <Stack gap="xl">
@@ -93,119 +119,20 @@ const DocumentCaseDetail = () => {
       )}
 
       <CaseExtractionAlert
-        extraction={reportData.extractions
-          ?.slice()
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]}
+        extraction={
+          reportData.extractions
+            ?.slice()
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+        }
         documentCase={reportData}
       />
 
       {hasActiveVerification && <CaseCollectionAlert documentCase={reportData} />}
 
-      <Tabs defaultValue="document" variant="default">
-        <Tabs.List>
-          <Tabs.Tab value="document" leftSection={<TablerIcon name="id" size={16} />}>
-            Document
-          </Tabs.Tab>
-          <Tabs.Tab value="images" leftSection={<TablerIcon name="photo" size={16} />}>
-            Images
-          </Tabs.Tab>
-          <Tabs.Tab value="location" leftSection={<TablerIcon name="mapPin" size={16} />}>
-            Location
-          </Tabs.Tab>
-          <Tabs.Tab value="details" leftSection={<TablerIcon name="infoCircle" size={16} />}>
-            Report Details
-          </Tabs.Tab>
-          <Tabs.Tab value="additional" leftSection={<TablerIcon name="fileText" size={16} />}>
-            Additional
-          </Tabs.Tab>
-          {(reportData.extractions?.length ?? 0) > 0 && (
-            <Tabs.Tab value="extraction" leftSection={<TablerIcon name="robot" size={16} />}>
-              AI Processing
-            </Tabs.Tab>
-          )}
-          {!isLostCase && (
-            <Tabs.Tab value="exchanges" leftSection={<TablerIcon name="arrowsExchange" size={16} />}>
-              Exchanges
-            </Tabs.Tab>
-          )}
-        </Tabs.List>
-
-        <Tabs.Panel value="document" pt="md">
-          <Paper withBorder p="lg">
-            <DocumentInformation
-              document={reportData.document!}
-              reportType={reportType}
-              status={status}
-            />
-          </Paper>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="images" pt="md">
-          <Paper withBorder p="lg">
-            <DocumentImages
-              document={reportData.document!}
-              reportType={reportType}
-              status={status}
-            />
-          </Paper>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="location" pt="md">
-          <Paper withBorder p="lg">
-            <LocationInformation
-              documentCase={reportData}
-              reportType={reportType}
-              status={status}
-            />
-          </Paper>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="details" pt="md">
-          <Paper withBorder p="lg">
-            <Stack gap="lg">
-              <ReportDetails
-                lostOrFoundDate={reportData.eventDate}
-                createdAt={reportData.createdAt}
-                description={reportData.description}
-                tags={reportData.tags}
-                lostDocumentCase={reportData.lostDocumentCase}
-                foundDocumentCase={reportData.foundDocumentCase}
-                documentCase={reportData}
-              />
-              <ContactFooter
-                reportType={reportType}
-                foundDocumentCase={reportData.foundDocumentCase}
-              />
-            </Stack>
-          </Paper>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="additional" pt="md">
-          <Paper withBorder p="lg">
-            <AdditionalDetails
-              caseId={reportData.id}
-              caseNumber={reportData.caseNumber}
-              reportType={reportType}
-              status={status}
-              document={reportData.document}
-              lostDocumentCase={reportData.lostDocumentCase}
-            />
-          </Paper>
-        </Tabs.Panel>
-
-        {(reportData.extractions?.length ?? 0) > 0 && (
-          <Tabs.Panel value="extraction" pt="md">
-            <Paper withBorder p="lg">
-              <ExtractionInteractionsPanel extractions={reportData.extractions ?? []} />
-            </Paper>
-          </Tabs.Panel>
-        )}
-        {!isLostCase && (
-          <Tabs.Panel value="exchanges" pt="md">
-            <ExchangesPanel foundCaseId={foundCaseId!} />
-          </Tabs.Panel>
-        )}
-      </Tabs>
+      <Stack gap="md">
+        <RouteTabs basePath={`/dashboard/cases/${reportData.id}`} tabs={tabs} iconSize={16} />
+        <Outlet context={context} />
+      </Stack>
     </Stack>
   );
 };

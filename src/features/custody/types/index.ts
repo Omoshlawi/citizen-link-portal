@@ -125,6 +125,15 @@ export interface DocumentOperationItem {
   createdAt: string;
 }
 
+/** Set on operations the system recorded itself when a handover code was confirmed. */
+export interface DocumentOperationMetadata {
+  source?: 'EXCHANGE';
+  exchangeId?: string;
+  exchangeNumber?: string;
+  direction?: string;
+  method?: string;
+}
+
 export interface DocumentOperation {
   id: string;
   operationNumber: string;
@@ -141,6 +150,7 @@ export interface DocumentOperation {
   responsiblePerson?: { id: string; name: string } | null;
   notes?: string | null;
   targetArea?: string | null;
+  metadata?: DocumentOperationMetadata | null;
   completedAt?: string | null;
   items: DocumentOperationItem[];
   createdAt: string;

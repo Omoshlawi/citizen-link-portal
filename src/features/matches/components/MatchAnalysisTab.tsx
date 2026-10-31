@@ -7,7 +7,10 @@ interface MatchAnalysisTabProps {
 }
 
 export const MatchAnalysisTab = ({ match }: MatchAnalysisTabProps) => {
-  if (!match.layer2FieldScores) {
+  // Older or hand-inserted matches can carry `{}` here, so check the fields themselves.
+  const fields = match.layer2FieldScores?.fields ?? [];
+
+  if (fields.length === 0) {
     return (
       <Paper withBorder p="xl" ta="center">
         <TablerIcon name="databaseOff" size={48} color="dimmed" stroke={1.5} />
@@ -35,7 +38,7 @@ export const MatchAnalysisTab = ({ match }: MatchAnalysisTabProps) => {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {match.layer2FieldScores.fields.map((f, i) => (
+            {fields.map((f, i) => (
               <Table.Tr key={i}>
                 <Table.Td>
                   <Text size="sm" fw={600}>

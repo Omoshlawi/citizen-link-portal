@@ -83,7 +83,7 @@ export const useActiveOutboundExchange = (claimId?: string) => {
         active: true,
         direction: ExchangeDirection.OUTBOUND,
         claimId,
-        v: 'custom:include(verifications)',
+        v: 'custom:include(verifications,foundCase)',
       })
     : null;
 
@@ -114,6 +114,10 @@ export const useActiveOutboundExchange = (claimId?: string) => {
         expiresAt: pendingVerification?.expiresAt,
         attempts: pendingVerification?.attempts,
         maxAttempts: pendingVerification?.maxAttempts,
+        holdingStationId:
+          activeExchange.foundCase?.custodyStatus === 'IN_CUSTODY'
+            ? activeExchange.foundCase.currentStationId
+            : null,
       }
     : { hasActiveExchange: false };
 

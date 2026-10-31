@@ -100,6 +100,7 @@ export interface DocumentExchange {
   createdAt: string;
   updatedAt: string;
   verifications?: ExchangeVerification[];
+  foundCase?: { custodyStatus: string; currentStationId: string | null } | null;
   station?: ExchangeStation | null;
   address?: ExchangeAddress | null;
   createdBy?: ExchangeUser | null;
@@ -117,4 +118,6 @@ export interface ActiveExchangeState {
   attempts?: number;
   maxAttempts?: number;
   code?: string;
+  /** Station currently holding the document; null when not in custody at a station. */
+  holdingStationId?: string | null;
 }

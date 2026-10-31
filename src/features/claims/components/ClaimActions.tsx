@@ -8,6 +8,7 @@ import {
   VerifyOutboundCollectionCode,
 } from '@/features/cases/components/form-actions';
 import { useActiveOutboundExchange } from '@/features/exchange';
+import { useActiveStation } from '@/hooks/useActiveStation';
 import {
   RejectClaimForm,
   RejectReviewForm,
@@ -28,6 +29,10 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
     claim.id
   );
   const { invoice } = useInvoice(claim.id);
+  const { stationId } = useActiveStation();
+  // Release only from the station holding the document — the API enforces this too.
+  const heldHere = !!stationId && exchange.holdingStationId === stationId;
+  const notHeldHint = 'Held at another station — transfer or request it first.';
 
   const handleReject = () => {
     const dismiss = launchWorkspace(<RejectClaimForm claim={claim} onClose={() => dismiss()} />, {
@@ -93,6 +98,8 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
               variant="filled"
               size="sm"
               onClick={onClick}
+              disabled={!heldHere}
+              title={heldHere ? undefined : notHeldHint}
             >
               Enter Code
             </Button>
@@ -210,6 +217,11 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
           <>
             <Menu.Divider />
             <Menu.Label>Collection</Menu.Label>
+            {!heldHere && (
+              <Text size="xs" c="dimmed" px="sm" pb={4}>
+                {notHeldHint}
+              </Text>
+            )}
             {hasActiveVerification ? (
               <>
                 <IssueOutboundCollectionCode
@@ -220,6 +232,7 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
                       leftSection={<TablerIcon name="send" size={14} />}
                       onClick={onClick}
                       color="teal"
+                      disabled={!heldHere}
                     >
                       Resend Code
                     </Menu.Item>
@@ -248,6 +261,7 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
                     leftSection={<TablerIcon name="packageExport" size={14} />}
                     onClick={onClick}
                     color="teal"
+                    disabled={!heldHere}
                   >
                     Issue Code
                   </Menu.Item>

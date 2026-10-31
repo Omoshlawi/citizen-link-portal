@@ -8,11 +8,14 @@ import { OPERATION_ICONS } from './operationIcons';
 
 interface OperationHistoryTimelineProps {
   operations: DocumentOperation[];
+  /** The case whose history is shown — batch operations hold other cases too. */
+  foundCaseId?: string;
   isLoading?: boolean;
 }
 
 export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> = ({
   operations,
+  foundCaseId,
 }) => {
   if (operations.length === 0) {
     return (
@@ -26,6 +29,8 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
     <Timeline active={operations.length - 1} bulletSize={28} lineWidth={2}>
       {operations.map((op) => {
         const iconName = OPERATION_ICONS[op.operationType?.code ?? ''] ?? 'circle';
+        const item = op.items.find((i) => i.foundCaseId === foundCaseId) ?? op.items[0];
+        const isSystemRecorded = op.metadata?.source === 'EXCHANGE';
         const stationLabel = (() => {
           const code = op.operationType?.code;
           if (code === 'REQUISITION') {
@@ -61,12 +66,19 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
             }
           >
             <Stack gap={4} mt={4}>
-              {op.items[0] && (
+              {item && (
                 <Group gap="xs">
-                  <CustodyStatusBadge status={op.items[0].custodyStatusBefore ?? undefined} />
+                  <CustodyStatusBadge status={item.custodyStatusBefore ?? undefined} />
                   <TablerIcon name="arrowRight" size={12} />
-                  <CustodyStatusBadge status={op.items[0].custodyStatusAfter ?? undefined} />
+                  <CustodyStatusBadge status={item.custodyStatusAfter ?? undefined} />
                 </Group>
+              )}
+
+              {isSystemRecorded && (
+                <Text size="xs" c="dimmed">
+                  Recorded automatically · confirmed by handover code
+                  {op.metadata?.exchangeNumber ? ` (${op.metadata.exchangeNumber})` : ''}
+                </Text>
               )}
 
               {stationLabel && (

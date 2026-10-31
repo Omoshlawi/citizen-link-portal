@@ -80,7 +80,7 @@ const CustodyDetailPage: React.FC = () => {
           {historyLoading ? (
             <Loader size="sm" />
           ) : (
-            <OperationHistoryTimeline operations={operations} />
+            <OperationHistoryTimeline operations={operations} foundCaseId={foundCaseId} />
           )}
         </Stack>
       </Card>

@@ -27,9 +27,26 @@ import {
   TransitionReasonsPage,
   UsersTab,
 } from './features/admin/pages';
-import { DocumentCaseDetail, DocumentCasesPage, DocumentCasesTable } from './features/cases/pages';
+import {
+  CaseAdditionalTab,
+  CaseAiProcessingTab,
+  CaseDetailsTab,
+  CaseDocumentTab,
+  CaseExchangesTab,
+  CaseImagesTab,
+  CaseLocationTab,
+  DocumentCaseDetail,
+  DocumentCasesPage,
+  DocumentCasesTable,
+} from './features/cases/pages';
 import { ChatReportDetailPage, ChatReportsPage } from './features/chat-reports/pages';
-import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
+import {
+  ClaimAttachmentsTab,
+  ClaimCasesComparisonTab,
+  ClaimDetailPage,
+  ClaimExchangesTab,
+  ClaimsPage,
+} from './features/claims/pages';
 import {
   CustodyDetailPage,
   CustodyListPage,
@@ -44,7 +61,13 @@ import { ConfirmDeliveryPage, OpenCasePage } from './features/deep-link/pages';
 import { AuthLayout, LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
 import { RecordedMatchesTab, SemanticMatchesTab } from './features/matches/components';
-import { MatchDetailPage, MatchesPage } from './features/matches/pages';
+import {
+  MatchAnalysisRoute,
+  MatchComparisonRoute,
+  MatchDetailPage,
+  MatchesPage,
+  MatchImagesRoute,
+} from './features/matches/pages';
 import {
   PasswordSettings,
   ProfileSettings,
@@ -168,7 +191,20 @@ const router = createBrowserRouter([
                   { path: 'found', element: <DocumentCasesTable type="found" /> },
                 ],
               },
-              { path: ':reportId', element: <DocumentCaseDetail /> },
+              {
+                path: ':reportId',
+                element: <DocumentCaseDetail />,
+                children: [
+                  { index: true, element: <Navigate to="document" replace /> },
+                  { path: 'document', element: <CaseDocumentTab /> },
+                  { path: 'images', element: <CaseImagesTab /> },
+                  { path: 'location', element: <CaseLocationTab /> },
+                  { path: 'details', element: <CaseDetailsTab /> },
+                  { path: 'additional', element: <CaseAdditionalTab /> },
+                  { path: 'ai-processing', element: <CaseAiProcessingTab /> },
+                  { path: 'exchanges', element: <CaseExchangesTab /> },
+                ],
+              },
             ],
           },
           {
@@ -186,7 +222,16 @@ const router = createBrowserRouter([
             element: gated('claims', <Outlet />),
             children: [
               { index: true, element: <ClaimsPage /> },
-              { path: ':claimId', element: <ClaimDetailPage /> },
+              {
+                path: ':claimId',
+                element: <ClaimDetailPage />,
+                children: [
+                  { index: true, element: <Navigate to="cases-comparison" replace /> },
+                  { path: 'cases-comparison', element: <ClaimCasesComparisonTab /> },
+                  { path: 'attachments', element: <ClaimAttachmentsTab /> },
+                  { path: 'exchanges', element: <ClaimExchangesTab /> },
+                ],
+              },
             ],
           },
           {
@@ -200,7 +245,16 @@ const router = createBrowserRouter([
                   { path: 'semantic', element: <SemanticMatchesTab /> },
                 ],
               },
-              { path: ':matchId', element: <MatchDetailPage /> },
+              {
+                path: ':matchId',
+                element: <MatchDetailPage />,
+                children: [
+                  { index: true, element: <Navigate to="comparison" replace /> },
+                  { path: 'comparison', element: <MatchComparisonRoute /> },
+                  { path: 'analysis', element: <MatchAnalysisRoute /> },
+                  { path: 'images', element: <MatchImagesRoute /> },
+                ],
+              },
             ],
           },
           {
