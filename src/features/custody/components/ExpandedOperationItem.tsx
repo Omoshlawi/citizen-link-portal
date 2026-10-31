@@ -1,5 +1,6 @@
 import { FC } from 'react';
-import { ActionIcon, Badge, Group, Table, Text } from '@mantine/core';
+import { Link } from 'react-router-dom';
+import { ActionIcon, Anchor, Badge, Group, Table, Text } from '@mantine/core';
 import { openConfirmModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
@@ -81,15 +82,25 @@ const ExpandedOperationItem: FC<ExpandedOperationItemProps> = ({
   return (
     <Table.Tr key={item.id}>
       <Table.Td>
-        <Text
-          size="sm"
-          fw={500}
-          component="a"
-          href={`/dashboard/cases/${item.foundCase?.case?.id}`}
-          style={{ textDecoration: 'none' }}
-        >
-          {item.foundCase?.case?.caseNumber ?? item.foundCaseId.slice(0, 8)}
-        </Text>
+        {item.foundCase?.case?.id ? (
+          <Group gap={4} wrap="nowrap">
+            <Anchor component={Link} to={`/dashboard/cases/${item.foundCase.case.id}`} size="sm">
+              {item.foundCase.case.caseNumber}
+            </Anchor>
+            <ActionIcon
+              component={Link}
+              to={`/dashboard/custody/${item.foundCase.case.id}`}
+              variant="subtle"
+              color="civicBlue"
+              size="xs"
+              title="Custody history"
+            >
+              <TablerIcon name="history" size={12} />
+            </ActionIcon>
+          </Group>
+        ) : (
+          <Text size="sm">{item.foundCaseId.slice(0, 8)}</Text>
+        )}
       </Table.Td>
       <Table.Td>
         <Text size="sm" c="dimmed">

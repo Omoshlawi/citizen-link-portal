@@ -266,7 +266,7 @@ const router = createBrowserRouter([
             element: gated('custody', <Outlet />),
             children: [
               { index: true, element: <CustodyListPage /> },
-              { path: ':foundCaseId', element: <CustodyDetailPage /> },
+              { path: ':caseId', element: <CustodyDetailPage /> },
             ],
           },
           {

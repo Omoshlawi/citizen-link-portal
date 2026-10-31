@@ -16,11 +16,11 @@ export const useStations = (params: Record<string, any> = {}, skip: boolean = fa
   };
 };
 
-export const useStation = (id: string) => {
-  const url = constructUrl(`/stations/${id}`);
+export const useStation = (id?: string | null) => {
+  const url = id ? constructUrl(`/stations/${id}`) : null;
   const { data, error, isLoading, mutate } = useSWR<APIFetchResponse<Station>>(url);
   return {
-    stations: data?.data,
+    station: data?.data,
     isLoading,
     error,
     mutate,

@@ -3,18 +3,27 @@ import { useParams } from 'react-router-dom';
 import { Card, Divider, Group, Loader, Stack, Text, Title } from '@mantine/core';
 import { DashboardPageHeader } from '@/components';
 import { useDocumentCase } from '@/features/cases/hooks';
-import { useCustodyHistory } from '../hooks/useCustody';
-import { CustodyStatusBadge } from '../components/CustodyStatusBadge';
+import { CustodyStatus } from '@/features/cases/types';
 import { DocumentCustodyActions } from '../components';
+import { CustodyStatusBadge } from '../components/CustodyStatusBadge';
 import { OperationHistoryTimeline } from '../components/OperationHistoryTimeline';
+import { useCustodyHistory } from '../hooks/useCustody';
+import { useStation } from '../hooks/useStations';
 
+/** Route param is the DocumentCase id; custody history is keyed by its FoundDocumentCase id. */
 const CustodyDetailPage: React.FC = () => {
-  const { foundCaseId } = useParams<{ foundCaseId: string }>();
-  const { report, isLoading: caseLoading } = useDocumentCase(foundCaseId);
-  const { operations, isLoading: historyLoading, mutate } = useCustodyHistory(foundCaseId);
+  const { caseId } = useParams<{ caseId: string }>();
+  const { report, isLoading: caseLoading, mutate: mutateCase } = useDocumentCase(caseId);
 
   const foundCase = report?.foundDocumentCase;
   const document = report?.document;
+
+  const {
+    operations,
+    isLoading: historyLoading,
+    mutate: mutateHistory,
+  } = useCustodyHistory(foundCase?.id, { orderBy: 'createdAt' });
+  const { station: currentStation } = useStation(foundCase?.currentStationId);
 
   if (caseLoading) {
     return (
@@ -45,12 +54,15 @@ const CustodyDetailPage: React.FC = () => {
           <Group justify="space-between">
             <Title order={5}>Custody Status</Title>
             <Group gap="xs">
-              <CustodyStatusBadge status={(foundCase as any).custodyStatus} />
+              <CustodyStatusBadge status={foundCase.custodyStatus} />
               <DocumentCustodyActions
                 foundCaseId={foundCase.id}
-                custodyStatus={(foundCase as any).custodyStatus}
-                currentStationId={(foundCase as any).currentStationId}
-                onActionComplete={() => void mutate()}
+                custodyStatus={foundCase.custodyStatus ?? CustodyStatus.WITH_FINDER}
+                currentStationId={foundCase.currentStationId}
+                onActionComplete={() => {
+                  void mutateCase();
+                  void mutateHistory();
+                }}
               />
             </Group>
           </Group>
@@ -59,16 +71,28 @@ const CustodyDetailPage: React.FC = () => {
 
           <Group gap="xl">
             <Stack gap={2}>
-              <Text size="xs" c="dimmed">Document</Text>
-              <Text size="sm" fw={600}>{document?.fullName ?? '—'}</Text>
+              <Text size="xs" c="dimmed">
+                Document
+              </Text>
+              <Text size="sm" fw={600}>
+                {document?.fullName ?? '—'}
+              </Text>
             </Stack>
             <Stack gap={2}>
-              <Text size="xs" c="dimmed">Current Station</Text>
-              <Text size="sm" fw={600}>{(foundCase as any).currentStation?.name ?? '—'}</Text>
+              <Text size="xs" c="dimmed">
+                Current Station
+              </Text>
+              <Text size="sm" fw={600}>
+                {currentStation?.name ?? '—'}
+              </Text>
             </Stack>
             <Stack gap={2}>
-              <Text size="xs" c="dimmed">Operations</Text>
-              <Text size="sm" fw={600}>{operations.length}</Text>
+              <Text size="xs" c="dimmed">
+                Operations
+              </Text>
+              <Text size="sm" fw={600}>
+                {operations.length}
+              </Text>
             </Stack>
           </Group>
         </Stack>
@@ -80,7 +104,7 @@ const CustodyDetailPage: React.FC = () => {
           {historyLoading ? (
             <Loader size="sm" />
           ) : (
-            <OperationHistoryTimeline operations={operations} foundCaseId={foundCaseId} />
+            <OperationHistoryTimeline operations={operations} foundCaseId={foundCase.id} />
           )}
         </Stack>
       </Card>

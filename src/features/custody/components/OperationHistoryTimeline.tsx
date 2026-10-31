@@ -45,7 +45,10 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
             return performer ?? null;
           }
           if (op.station && op.counterpartStation) {
-            return `${op.station.name} → ${op.counterpartStation.name}`;
+            // TRANSFER_IN is recorded by the receiver; its counterpart is where it came from.
+            return code === 'TRANSFER_IN'
+              ? `${op.counterpartStation.name} → ${op.station.name}`
+              : `${op.station.name} → ${op.counterpartStation.name}`;
           }
           return op.station?.name ?? op.counterpartStation?.name ?? null;
         })();
