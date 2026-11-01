@@ -84,8 +84,8 @@ export const useAddressesApi = () => {
   };
 };
 
-export const useAddressHierarchy = (filters: AddressFilters = {}) => {
-  const url = constructUrl('/address-hierarchy', filters);
+export const useAddressHierarchy = (filters: AddressFilters = {}, skip = false) => {
+  const url = skip ? null : constructUrl('/address-hierarchy', filters);
   const {
     data,
     error,

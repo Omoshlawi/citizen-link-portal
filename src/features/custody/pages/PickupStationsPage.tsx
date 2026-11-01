@@ -1,11 +1,22 @@
 import React, { useMemo } from 'react';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import { ColumnDef, Row } from '@tanstack/react-table';
-import { ActionIcon, Badge, Group, Select, Stack, Text, TextInput } from '@mantine/core';
-import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
+import { ActionIcon, Badge, Group, Menu, Select, Stack, Text, TextInput } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { showNotification } from '@mantine/notifications';
+import {
+  DashboardPageHeader,
+  launchWorkspace,
+  StateFullDataTable,
+  SystemAuthorized,
+  TablerIcon,
+} from '@/components';
+import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
+import { handleApiErrors } from '@/lib/api';
 import { StationOperationsPanel } from '../components';
-import { useStations } from '../hooks/useStations';
+import StationForm from '../forms/StationForm';
+import { useStations, useStationsApi } from '../hooks/useStations';
 import { Station } from '../types';
 
 const PickupStationsPage: React.FC = () => {
@@ -26,6 +37,68 @@ const PickupStationsPage: React.FC = () => {
     search,
     includeVoided: status === 'inactive' || status === 'all',
   });
+  const { deleteStation, restoreStation, mutateStations } = useStationsApi();
+  const { hasAccess: canCreate } = useUserHasSystemAccess({ station: ['create'] });
+
+  const handleLaunchForm = (station?: Station) => {
+    const dispose = launchWorkspace(
+      <StationForm station={station} closeWorkspace={() => dispose()} />,
+      { title: station ? `Edit ${station.name}` : 'New station', width: 'wide', expandable: true }
+    );
+  };
+
+  const handleDeactivate = (station: Station) => {
+    modals.openConfirmModal({
+      title: 'Deactivate station',
+      centered: true,
+      children: (
+        <Text size="sm">
+          Deactivate{' '}
+          <Text span fw={600}>
+            {station.name}
+          </Text>
+          ? Staff won't be able to select it and citizens won't see it. You can restore it later.
+        </Text>
+      ),
+      labels: { confirm: 'Deactivate', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        try {
+          await deleteStation(station.id);
+          showNotification({
+            title: 'Station deactivated',
+            message: `${station.name} was deactivated.`,
+            color: 'green',
+          });
+          mutateStations();
+        } catch (error) {
+          showNotification({
+            title: 'Failed to deactivate station',
+            message: handleApiErrors(error).detail ?? 'Unknown error occurred',
+            color: 'red',
+          });
+        }
+      },
+    });
+  };
+
+  const handleRestore = async (station: Station) => {
+    try {
+      await restoreStation(station.id);
+      showNotification({
+        title: 'Station restored',
+        message: `${station.name} is active again.`,
+        color: 'green',
+      });
+      mutateStations();
+    } catch (error) {
+      showNotification({
+        title: 'Failed to restore station',
+        message: handleApiErrors(error).detail ?? 'Unknown error occurred',
+        color: 'red',
+      });
+    }
+  };
 
   const columns = useMemo<ColumnDef<Station>[]>(
     () => [
@@ -85,6 +158,60 @@ const PickupStationsPage: React.FC = () => {
           </Badge>
         ),
       },
+      {
+        id: 'actions',
+        header: '',
+        size: 0,
+        cell: ({ row: { original } }) => (
+          <Menu shadow="md" width={180} position="bottom-end">
+            <Menu.Target>
+              <ActionIcon variant="subtle" color="gray" aria-label="Station actions">
+                <TablerIcon name="dots" size={16} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <SystemAuthorized
+                permissions={{ station: ['update'] }}
+                unauthorizedAction={{ type: 'hide' }}
+              >
+                <Menu.Item
+                  leftSection={<TablerIcon name="edit" size={14} />}
+                  onClick={() => handleLaunchForm(original)}
+                >
+                  Edit
+                </Menu.Item>
+              </SystemAuthorized>
+              {original.voided ? (
+                <SystemAuthorized
+                  permissions={{ station: ['restore'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
+                  <Menu.Item
+                    color="green"
+                    leftSection={<TablerIcon name="restore" size={14} />}
+                    onClick={() => handleRestore(original)}
+                  >
+                    Restore
+                  </Menu.Item>
+                </SystemAuthorized>
+              ) : (
+                <SystemAuthorized
+                  permissions={{ station: ['delete'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
+                  <Menu.Item
+                    color="red"
+                    leftSection={<TablerIcon name="ban" size={14} />}
+                    onClick={() => handleDeactivate(original)}
+                  >
+                    Deactivate
+                  </Menu.Item>
+                </SystemAuthorized>
+              )}
+            </Menu.Dropdown>
+          </Menu>
+        ),
+      },
     ],
     []
   );
@@ -93,7 +220,7 @@ const PickupStationsPage: React.FC = () => {
     <Stack gap="md">
       <DashboardPageHeader
         title="Stations"
-        subTitle="Configure which operations are available at each station"
+        subTitle="Manage stations and the operations available at each"
         icon="buildingStore"
       />
       <StateFullDataTable
@@ -101,6 +228,7 @@ const PickupStationsPage: React.FC = () => {
         isLoading={isLoading}
         error={error}
         columns={columns}
+        onAdd={canCreate ? () => handleLaunchForm() : undefined}
         renderExpandedRow={(row: Row<Station>) => <StationOperationsPanel station={row.original} />}
         renderActions={() => (
           <Group gap="xs">

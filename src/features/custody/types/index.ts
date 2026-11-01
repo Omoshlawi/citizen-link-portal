@@ -1,14 +1,16 @@
 import { z } from 'zod';
 import { Address } from '@/features/addresses/types';
 import { FoundDocumentCase } from '@/features/cases/types';
-import { GrantStaffOperationSchema } from '../utils/validation';
+import { GrantStaffOperationSchema, StationSchema } from '../utils/validation';
 
 export type GrantStaffOperationFormData = z.infer<typeof GrantStaffOperationSchema>;
+export type StationFormInput = z.input<typeof StationSchema>;
+export type StationFormData = z.output<typeof StationSchema>;
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 export enum SubmissionMethod {
-  STATION_DROPOFF = "STATION_DROPOFF",
-  AGENT_PICKUP = "AGENT_PICKUP",
+  STATION_DROPOFF = 'STATION_DROPOFF',
+  AGENT_PICKUP = 'AGENT_PICKUP',
 }
 
 export enum CustodyStatus {
@@ -103,6 +105,12 @@ export interface Station {
   level1: string;
   level2?: string | null;
   level3?: string | null;
+  level4?: string | null;
+  level5?: string | null;
+  postalCode?: string | null;
+  country: string;
+  addressLocaleCode: string;
+  coordinates?: { lat?: number | null; lng?: number | null } | null;
   phoneNumber?: string | null;
   email?: string | null;
   formatted?: string | null;
