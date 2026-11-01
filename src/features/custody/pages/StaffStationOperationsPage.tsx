@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef, Row } from '@tanstack/react-table';
-import { ActionIcon, Badge, Menu, Stack, Text } from '@mantine/core';
+import { ActionIcon, Badge, Menu, Stack, Text, TextInput } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
@@ -9,54 +9,20 @@ import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
 import { ExpandedGrantRow } from '../components';
 import GrantStaffOperationForm from '../forms/GrantStaffOperationForm';
-import { revokeStaffStationOperation, useStaffOperationScope } from '../hooks/useCustody';
-import { GroupedStaffGrant, StaffOperationScope } from '../types';
-
-// ─── Grouping helper ──────────────────────────────────────────────────────────
-
-function groupByUser(grants: StaffOperationScope[]): GroupedStaffGrant[] {
-  const map = new Map<string, GroupedStaffGrant>();
-
-  for (const grant of grants) {
-    if (!map.has(grant.userId)) {
-      map.set(grant.userId, {
-        userId: grant.userId,
-        user: grant.user,
-        stations: [],
-        totalOperations: 0,
-        latestGrantedAt: grant.createdAt,
-      });
-    }
-
-    const group = map.get(grant.userId)!;
-
-    if (grant.createdAt > group.latestGrantedAt) {
-      group.latestGrantedAt = grant.createdAt;
-    }
-
-    let stationGroup = group.stations.find((s) => s.stationId === grant.stationId);
-    if (!stationGroup) {
-      stationGroup = { stationId: grant.stationId, station: grant.station, operations: [] };
-      group.stations.push(stationGroup);
-    }
-
-    stationGroup.operations.push(grant);
-    group.totalOperations++;
-  }
-
-  return Array.from(map.values());
-}
+import { revokeStaffStationOperation, useStaffWithGrants } from '../hooks/useCustody';
+import { StaffGrantSummary, StaffOperationScope } from '../types';
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const StaffStationOperationsPage: React.FC = () => {
-  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const { grants, totalCount, isLoading, mutate, error } = useStaffOperationScope({
+  const { page, pageSize, setPage, setPageSize, search, searchInput, setSearchInput } =
+    useTableUrlFilters();
+  // Paginated by staff member, so one person's grants are never split across pages.
+  const { staff, totalCount, isLoading, mutate, error } = useStaffWithGrants({
     page,
     limit: pageSize,
+    search,
   });
-
-  const grouped = useMemo(() => groupByUser(grants), [grants]);
 
   const handleRevoke = (grant: StaffOperationScope) => {
     modals.openConfirmModal({
@@ -97,7 +63,7 @@ const StaffStationOperationsPage: React.FC = () => {
     );
   };
 
-  const columns = useMemo<ColumnDef<GroupedStaffGrant>[]>(
+  const columns = useMemo<ColumnDef<StaffGrantSummary>[]>(
     () => [
       {
         id: 'expand',
@@ -120,7 +86,7 @@ const StaffStationOperationsPage: React.FC = () => {
         id: 'user',
         cell: ({ row: { original } }) => (
           <Text size="sm" fw={500}>
-            {original.user?.name ?? original.userId}
+            {original.user.name}
           </Text>
         ),
       },
@@ -129,7 +95,7 @@ const StaffStationOperationsPage: React.FC = () => {
         id: 'stations',
         cell: ({ row: { original } }) => (
           <Badge variant="light" color="teal" size="sm">
-            {original.stations.length}
+            {original.stationCount}
           </Badge>
         ),
       },
@@ -138,14 +104,15 @@ const StaffStationOperationsPage: React.FC = () => {
         id: 'operations',
         cell: ({ row: { original } }) => (
           <Badge variant="light" color="civicBlue" size="sm">
-            {original.totalOperations}
+            {original.operationCount}
           </Badge>
         ),
       },
       {
         header: 'Last Granted',
         id: 'latestGrantedAt',
-        cell: ({ row: { original } }) => formatDate(original.latestGrantedAt),
+        cell: ({ row: { original } }) =>
+          original.latestGrantedAt ? formatDate(original.latestGrantedAt) : '—',
       },
       {
         id: 'actions',
@@ -182,13 +149,23 @@ const StaffStationOperationsPage: React.FC = () => {
         icon="userCog"
       />
       <StateFullDataTable
-        data={grouped}
+        data={staff}
         error={error}
         isLoading={isLoading}
         onAdd={handleGrant}
         columns={columns}
-        renderExpandedRow={(row: Row<GroupedStaffGrant>) => (
-          <ExpandedGrantRow group={row.original} onRevoke={handleRevoke} />
+        renderExpandedRow={(row: Row<StaffGrantSummary>) => (
+          <ExpandedGrantRow userId={row.original.userId} onRevoke={handleRevoke} />
+        )}
+        renderActions={() => (
+          <TextInput
+            placeholder="Search staff..."
+            size="xs"
+            w={220}
+            leftSection={<TablerIcon name="search" size={14} />}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.currentTarget.value)}
+          />
         )}
         pagination={{
           totalCount,

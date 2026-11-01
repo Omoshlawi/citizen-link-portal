@@ -13,6 +13,8 @@ import {
   CreateOperationPayload,
   DocumentOperation,
   DocumentOperationType,
+  StaffGrantDetail,
+  StaffGrantSummary,
   StaffOperationScope,
   StationOperationType,
   UpdateOperationPayload,
@@ -329,6 +331,32 @@ export const useStaffOperationScope = (
     error,
     mutate: swrMutate,
   };
+};
+
+/** Staff with active grants, paginated by person. */
+export const useStaffWithGrants = (params: Record<string, any> = {}) => {
+  const url = constructUrl('/operation-scope/staff', params);
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: swrMutate,
+  } = useApi<APIFetchResponse<PaginatedData<StaffGrantSummary>>>(url);
+  return {
+    staff: data?.data?.results ?? [],
+    totalCount: data?.data?.totalCount ?? 0,
+    isLoading,
+    error,
+    mutate: swrMutate,
+  };
+};
+
+/** One staff member's grants grouped by station; fetched when their row is expanded. */
+export const useStaffGrantDetail = (userId?: string) => {
+  const { data, error, isLoading } = useApi<APIFetchResponse<StaffGrantDetail>>(
+    userId ? `/operation-scope/staff/${userId}` : null
+  );
+  return { detail: data?.data, error, isLoading };
 };
 
 export const grantStaffStationOperation = async (payload: {

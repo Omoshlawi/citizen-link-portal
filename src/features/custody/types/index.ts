@@ -185,7 +185,18 @@ export interface UpdateOperationPayload {
   targetArea?: string | null;
 }
 
-// ── Staff grant grouping ──────────────────────────────────────────────────────
+// ── Staff grants (server-grouped, GET /operation-scope/staff) ──────────────────
+
+type StaffGrantUser = { id: string; name: string; email?: string | null; username?: string | null };
+
+/** One row per staff member; counts are computed by the server. */
+export type StaffGrantSummary = {
+  userId: string;
+  user: StaffGrantUser;
+  stationCount: number;
+  operationCount: number;
+  latestGrantedAt: string | null;
+};
 
 export type StationGroup = {
   stationId: string;
@@ -193,10 +204,9 @@ export type StationGroup = {
   operations: StaffOperationScope[];
 };
 
-export type GroupedStaffGrant = {
+/** A staff member's active grants grouped by station (GET /operation-scope/staff/:userId). */
+export type StaffGrantDetail = {
   userId: string;
-  user?: StaffOperationScope['user'];
+  user: StaffGrantUser;
   stations: StationGroup[];
-  totalOperations: number;
-  latestGrantedAt: string;
 };
