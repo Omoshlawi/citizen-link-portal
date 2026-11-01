@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
-import { Badge, Group, Loader, Stack, Switch, Table, Text } from '@mantine/core';
+import React, { useMemo, useState } from 'react';
+import { Badge, Button, Group, Loader, Switch, Table, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { TablerIcon } from '@/components';
+import { SystemAuthorized, TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import {
+  createStationOperationType,
   updateStationOperationType,
   useDocumentOperationTypes,
   useStationOperationTypes,
@@ -28,6 +29,22 @@ export const StationOperationsPanel: React.FC<StationOperationsPanelProps> = ({ 
         })),
     [operationTypes, stationOpTypes]
   );
+
+  const [linkingId, setLinkingId] = useState<string | null>(null);
+
+  // Links start switched off; staff then turn them on with the switch.
+  const handleLink = async (operationTypeId: string) => {
+    setLinkingId(operationTypeId);
+    try {
+      await createStationOperationType(station.id, { operationTypeId, isEnabled: false });
+      void mutate();
+    } catch (err) {
+      const e = handleApiErrors<{}>(err);
+      showNotification({ title: 'Error', message: e.detail ?? 'Failed to link.', color: 'red' });
+    } finally {
+      setLinkingId(null);
+    }
+  };
 
   const handleToggle = async (stationOp: StationOperationType | null, isEnabled: boolean) => {
     if (!stationOp) {
@@ -112,9 +129,29 @@ export const StationOperationsPanel: React.FC<StationOperationsPanelProps> = ({ 
                   color="civicGreen"
                 />
               ) : (
-                <Text size="xs" c="dimmed">
-                  Not linked
-                </Text>
+                <SystemAuthorized
+                  permissions={{ stationOperationType: ['manage'] }}
+                  unauthorizedAction={{
+                    type: 'fallback',
+                    component: (
+                      <Text size="xs" c="dimmed">
+                        Not linked
+                      </Text>
+                    ),
+                  }}
+                >
+                  <Button
+                    size="compact-xs"
+                    variant="light"
+                    leftSection={<TablerIcon name="link" size={12} />}
+                    loading={linkingId === ot.id}
+                    disabled={linkingId !== null}
+                    onClick={() => handleLink(ot.id)}
+                    title="Adds this operation to the station, switched off"
+                  >
+                    Link
+                  </Button>
+                </SystemAuthorized>
               )}
             </Table.Td>
           </Table.Tr>

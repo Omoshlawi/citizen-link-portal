@@ -175,7 +175,14 @@ export const recordDisposal = (foundCaseId: string, data: { stationId: string; n
 export const initiateTransfer = (
   foundCaseId: string,
   data: { counterpartStationId: string; notes?: string }
-) => singleItemOp(foundCaseId, 'TRANSFER_OUT', 'counterpartStationId', data.counterpartStationId, data.notes);
+) =>
+  singleItemOp(
+    foundCaseId,
+    'TRANSFER_OUT',
+    'counterpartStationId',
+    data.counterpartStationId,
+    data.notes
+  );
 
 export const recordReturn = (foundCaseId: string, data: { stationId: string; notes?: string }) =>
   singleItemOp(foundCaseId, 'RETURN', 'stationId', data.stationId, data.notes);
@@ -272,6 +279,18 @@ export const useStationOperationTypes = (
     error,
     mutate: swrMutate,
   };
+};
+
+export const createStationOperationType = async (
+  stationId: string,
+  payload: { operationTypeId: string; isEnabled: boolean }
+) => {
+  const result = await apiFetch<StationOperationType>(`/stations/${stationId}/operation-types`, {
+    method: 'POST',
+    data: payload,
+  });
+  mutate(`/stations/${stationId}/operation-types`);
+  return result.data;
 };
 
 export const updateStationOperationType = async (
