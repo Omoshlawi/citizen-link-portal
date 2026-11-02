@@ -7,6 +7,7 @@ import {
   RevokeOutboundCollectionCode,
   VerifyOutboundCollectionCode,
 } from '@/features/cases/components/form-actions';
+import { useCanPerformAtStation } from '@/features/custody/hooks/useCustody';
 import { useActiveOutboundExchange } from '@/features/exchange';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import {
@@ -33,6 +34,10 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
   // Release only from the station holding the document — the API enforces this too.
   const heldHere = !!stationId && exchange.holdingStationId === stationId;
   const notHeldHint = 'Held at another station — transfer or request it first.';
+  // Code actions record a HANDOVER at the active station, so they need that grant too.
+  const { allowed: canHandover } = useCanPerformAtStation('HANDOVER');
+  const noHandoverHint = canHandover ? undefined : "You aren't granted Handover at this station";
+  const releaseBlockedHint = heldHere ? noHandoverHint : notHeldHint;
 
   const handleReject = () => {
     const dismiss = launchWorkspace(<RejectClaimForm claim={claim} onClose={() => dismiss()} />, {
@@ -98,180 +103,188 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
               variant="filled"
               size="sm"
               onClick={onClick}
-              disabled={!heldHere}
-              title={heldHere ? undefined : notHeldHint}
+              disabled={!!releaseBlockedHint}
+              title={releaseBlockedHint}
             >
               Enter Code
             </Button>
           )}
         />
       )}
-    <Menu shadow="md" width={200}>
-      <Menu.Target>
-        <Button
-          variant="light"
-          aria-label="Actions"
-          leftSection={
-            <TablerIcon name="dotsVertical" style={{ width: '70%', height: '70%' }} stroke={1.5} />
-          }
-        >
-          Actions
-        </Button>
-      </Menu.Target>
-      <Menu.Dropdown>
-        <Menu.Label>Actions</Menu.Label>
-        <Menu.Divider />
-        {claim.status === ClaimStatus.DISPUTED && (
-          <SystemAuthorized
-            permissions={{ claim: ['review-dispute'] }}
-            unauthorizedAction={{ type: 'hide' }}
+      <Menu shadow="md" width={200}>
+        <Menu.Target>
+          <Button
+            variant="light"
+            aria-label="Actions"
+            leftSection={
+              <TablerIcon
+                name="dotsVertical"
+                style={{ width: '70%', height: '70%' }}
+                stroke={1.5}
+              />
+            }
           >
-            <Menu.Item
-              leftSection={<TablerIcon name="check" size={14} />}
-              onClick={handleReview}
-              color="green"
+            Actions
+          </Button>
+        </Menu.Target>
+        <Menu.Dropdown>
+          <Menu.Label>Actions</Menu.Label>
+          <Menu.Divider />
+          {claim.status === ClaimStatus.DISPUTED && (
+            <SystemAuthorized
+              permissions={{ claim: ['review-dispute'] }}
+              unauthorizedAction={{ type: 'hide' }}
             >
-              Review Dispute
-            </Menu.Item>
-          </SystemAuthorized>
-        )}
-        {claim.status === ClaimStatus.UNDER_REVIEW && (
-          <SystemAuthorized
-            permissions={{ claim: ['review-dispute'] }}
-            unauthorizedAction={{ type: 'hide' }}
-          >
-            <Menu.Item
-              leftSection={<TablerIcon name="check" size={14} />}
-              onClick={handleApproveReviewedClaim}
-              color="green"
+              <Menu.Item
+                leftSection={<TablerIcon name="check" size={14} />}
+                onClick={handleReview}
+                color="green"
+              >
+                Review Dispute
+              </Menu.Item>
+            </SystemAuthorized>
+          )}
+          {claim.status === ClaimStatus.UNDER_REVIEW && (
+            <SystemAuthorized
+              permissions={{ claim: ['review-dispute'] }}
+              unauthorizedAction={{ type: 'hide' }}
             >
-              Approve
-            </Menu.Item>
-          </SystemAuthorized>
-        )}
-        {claim.status === ClaimStatus.UNDER_REVIEW && (
+              <Menu.Item
+                leftSection={<TablerIcon name="check" size={14} />}
+                onClick={handleApproveReviewedClaim}
+                color="green"
+              >
+                Approve
+              </Menu.Item>
+            </SystemAuthorized>
+          )}
+          {claim.status === ClaimStatus.UNDER_REVIEW && (
+            <SystemAuthorized
+              permissions={{ claim: ['review-dispute'] }}
+              unauthorizedAction={{ type: 'hide' }}
+            >
+              <Menu.Item
+                leftSection={<TablerIcon name="x" size={14} />}
+                onClick={handleRejectReviewedClaim}
+                color="red"
+              >
+                Reject
+              </Menu.Item>
+            </SystemAuthorized>
+          )}
+          {verifyableStatuses.includes(claim.status) && (
+            <SystemAuthorized
+              permissions={{ claim: ['verify'] }}
+              unauthorizedAction={{ type: 'hide' }}
+            >
+              <Menu.Item
+                leftSection={<TablerIcon name="check" size={14} />}
+                onClick={handleVerify}
+                color="green"
+              >
+                Verify
+              </Menu.Item>
+            </SystemAuthorized>
+          )}
+          {rejectableStatuses.includes(claim.status) && (
+            <SystemAuthorized
+              permissions={{ claim: ['reject'] }}
+              unauthorizedAction={{ type: 'hide' }}
+            >
+              <Menu.Item
+                leftSection={<TablerIcon name="x" size={14} />}
+                onClick={handleReject}
+                color="red"
+              >
+                Reject
+              </Menu.Item>
+            </SystemAuthorized>
+          )}
           <SystemAuthorized
-            permissions={{ claim: ['review-dispute'] }}
+            permissions={{ claim: ['delete'] }}
             unauthorizedAction={{ type: 'hide' }}
           >
             <Menu.Item
-              leftSection={<TablerIcon name="x" size={14} />}
-              onClick={handleRejectReviewedClaim}
+              leftSection={<TablerIcon name="trash" size={14} />}
               color="red"
+              onClick={handleDelete}
             >
-              Reject
+              Delete
             </Menu.Item>
           </SystemAuthorized>
-        )}
-        {verifyableStatuses.includes(claim.status) && (
-          <SystemAuthorized
-            permissions={{ claim: ['verify'] }}
-            unauthorizedAction={{ type: 'hide' }}
-          >
-            <Menu.Item
-              leftSection={<TablerIcon name="check" size={14} />}
-              onClick={handleVerify}
-              color="green"
-            >
-              Verify
-            </Menu.Item>
-          </SystemAuthorized>
-        )}
-        {rejectableStatuses.includes(claim.status) && (
-          <SystemAuthorized
-            permissions={{ claim: ['reject'] }}
-            unauthorizedAction={{ type: 'hide' }}
-          >
-            <Menu.Item
-              leftSection={<TablerIcon name="x" size={14} />}
-              onClick={handleReject}
-              color="red"
-            >
-              Reject
-            </Menu.Item>
-          </SystemAuthorized>
-        )}
-        <SystemAuthorized permissions={{ claim: ['delete'] }} unauthorizedAction={{ type: 'hide' }}>
-          <Menu.Item
-            leftSection={<TablerIcon name="trash" size={14} />}
-            color="red"
-            onClick={handleDelete}
-          >
-            Delete
-          </Menu.Item>
-        </SystemAuthorized>
 
-        {claim.status === ClaimStatus.VERIFIED && invoice && (
-          <>
-            <Menu.Divider />
-            <Menu.Label>Invoice</Menu.Label>
-            <Menu.Item
-              leftSection={<TablerIcon name="fileDownload" size={14} />}
-              onClick={() => downloadInvoicePdf(invoice.id, invoice.invoiceNumber)}
-            >
-              Download Invoice
-            </Menu.Item>
-          </>
-        )}
-        {hasActiveExchange && exchange.exchangeNumber && (
-          <>
-            <Menu.Divider />
-            <Menu.Label>Collection</Menu.Label>
-            {!heldHere && (
-              <Text size="xs" c="dimmed" px="sm" pb={4}>
-                {notHeldHint}
-              </Text>
-            )}
-            {hasActiveVerification ? (
-              <>
+          {claim.status === ClaimStatus.VERIFIED && invoice && (
+            <>
+              <Menu.Divider />
+              <Menu.Label>Invoice</Menu.Label>
+              <Menu.Item
+                leftSection={<TablerIcon name="fileDownload" size={14} />}
+                onClick={() => downloadInvoicePdf(invoice.id, invoice.invoiceNumber)}
+              >
+                Download Invoice
+              </Menu.Item>
+            </>
+          )}
+          {hasActiveExchange && exchange.exchangeNumber && (
+            <>
+              <Menu.Divider />
+              <Menu.Label>Collection</Menu.Label>
+              {releaseBlockedHint && (
+                <Text size="xs" c="dimmed" px="sm" pb={4}>
+                  {releaseBlockedHint}
+                </Text>
+              )}
+              {hasActiveVerification ? (
+                <>
+                  <IssueOutboundCollectionCode
+                    claim={claim}
+                    exchangeNumber={exchange.exchangeNumber}
+                    renderTrigger={({ onClick }) => (
+                      <Menu.Item
+                        leftSection={<TablerIcon name="send" size={14} />}
+                        onClick={onClick}
+                        color="teal"
+                        disabled={!!releaseBlockedHint}
+                      >
+                        Resend Code
+                      </Menu.Item>
+                    )}
+                  />
+                  <RevokeOutboundCollectionCode
+                    claim={claim}
+                    exchangeNumber={exchange.exchangeNumber}
+                    renderTrigger={({ onClick }) => (
+                      <Menu.Item
+                        leftSection={<TablerIcon name="keyOff" size={14} />}
+                        onClick={onClick}
+                        color="orange"
+                        disabled={!canHandover}
+                      >
+                        Revoke Code
+                      </Menu.Item>
+                    )}
+                  />
+                </>
+              ) : (
                 <IssueOutboundCollectionCode
                   claim={claim}
                   exchangeNumber={exchange.exchangeNumber}
                   renderTrigger={({ onClick }) => (
                     <Menu.Item
-                      leftSection={<TablerIcon name="send" size={14} />}
+                      leftSection={<TablerIcon name="packageExport" size={14} />}
                       onClick={onClick}
                       color="teal"
-                      disabled={!heldHere}
+                      disabled={!!releaseBlockedHint}
                     >
-                      Resend Code
+                      Issue Code
                     </Menu.Item>
                   )}
                 />
-                <RevokeOutboundCollectionCode
-                  claim={claim}
-                  exchangeNumber={exchange.exchangeNumber}
-                  renderTrigger={({ onClick }) => (
-                    <Menu.Item
-                      leftSection={<TablerIcon name="keyOff" size={14} />}
-                      onClick={onClick}
-                      color="orange"
-                    >
-                      Revoke Code
-                    </Menu.Item>
-                  )}
-                />
-              </>
-            ) : (
-              <IssueOutboundCollectionCode
-                claim={claim}
-                exchangeNumber={exchange.exchangeNumber}
-                renderTrigger={({ onClick }) => (
-                  <Menu.Item
-                    leftSection={<TablerIcon name="packageExport" size={14} />}
-                    onClick={onClick}
-                    color="teal"
-                    disabled={!heldHere}
-                  >
-                    Issue Code
-                  </Menu.Item>
-                )}
-              />
-            )}
-          </>
-        )}
-      </Menu.Dropdown>
-    </Menu>
+              )}
+            </>
+          )}
+        </Menu.Dropdown>
+      </Menu>
     </Group>
   );
 };

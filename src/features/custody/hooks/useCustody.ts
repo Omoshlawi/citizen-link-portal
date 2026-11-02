@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useActiveStation } from '@/hooks/useActiveStation';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import {
   apiFetch,
@@ -418,4 +419,11 @@ export const useStaffAllowedOperations = (stationId: string, search?: string) =>
     error: sessionError || permisionError || error || stationOpTypeError,
     mutate,
   };
+};
+
+/** Whether the user may perform `code` at their active station (mirrors the backend custody check). */
+export const useCanPerformAtStation = (code: string) => {
+  const { stationId } = useActiveStation();
+  const { operations, isLoading } = useStaffAllowedOperations(stationId ?? '');
+  return { allowed: operations.some((op) => op?.code === code), isLoading };
 };

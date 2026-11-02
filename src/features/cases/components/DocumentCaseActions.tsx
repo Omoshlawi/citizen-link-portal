@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Group, Menu, Tooltip } from '@mantine/core';
 import { launchWorkspace, TablerIcon } from '@/components';
+import { useCanPerformAtStation } from '@/features/custody/hooks/useCustody';
 import { useActiveExchange } from '@/features/exchange';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import AnonymizeCaseForm from '../forms/AnonymizeCaseForm';
@@ -44,6 +45,9 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
     documentCase: ['resolveExtraction'],
   });
   const { hasAccess: canAnonymize } = useUserHasSystemAccess({ documentCase: ['anonymize'] });
+  // Handover codes record a RECEIPT at the active station, so they need that grant.
+  const { allowed: canReceive } = useCanPerformAtStation('RECEIPT');
+  const noReceiptHint = canReceive ? undefined : "You aren't granted Receipt at this station";
 
   const latestExtraction = documentCase.extractions
     ?.slice()
@@ -98,6 +102,8 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
               variant="filled"
               size="sm"
               onClick={onClick}
+              disabled={!canReceive}
+              title={noReceiptHint}
             >
               Enter Code
             </Button>
@@ -169,6 +175,8 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
                       <Menu.Item
                         leftSection={<TablerIcon name="send" size={14} />}
                         onClick={onClick}
+                        disabled={!canReceive}
+                        title={noReceiptHint}
                         color="civicBlue"
                       >
                         Resend Code
@@ -181,6 +189,8 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
                       <Menu.Item
                         leftSection={<TablerIcon name="keyOff" size={14} />}
                         onClick={onClick}
+                        disabled={!canReceive}
+                        title={noReceiptHint}
                         color="orange"
                       >
                         Revoke Code
@@ -209,6 +219,8 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
                     <Menu.Item
                       leftSection={<TablerIcon name="packageImport" size={14} />}
                       onClick={onClick}
+                      disabled={!canReceive}
+                      title={noReceiptHint}
                       color="civicBlue"
                     >
                       Issue Code
