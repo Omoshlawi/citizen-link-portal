@@ -133,9 +133,9 @@ export interface DocumentOperationItem {
   createdAt: string;
 }
 
-/** Set on operations the system recorded itself when a handover code was confirmed. */
+/** Set on operations the system recorded itself: a confirmed handover code, or a walk-in intake. */
 export interface DocumentOperationMetadata {
-  source?: 'EXCHANGE';
+  source?: 'EXCHANGE' | 'INTAKE';
   exchangeId?: string;
   exchangeNumber?: string;
   direction?: string;

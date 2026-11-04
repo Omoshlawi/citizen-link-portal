@@ -1,11 +1,13 @@
 import React from 'react';
 import { Badge, Button, Grid, Group, Stack, Text } from '@mantine/core';
-import { SectionTitle, StatusBadge, TablerIcon, launchWorkspace } from '@/components';
+import { launchWorkspace, SectionTitle, StatusBadge, TablerIcon } from '@/components';
+import { useStation } from '@/features/custody/hooks/useStations';
 import { useUserHasSystemAccessSync } from '@/hooks/useSystemAccess';
-import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
+import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
 import {
   DocumentCase,
+  FoundCaseSource,
   FoundDocumentCase,
   FoundDocumentCaseStatus,
   LostDocumentCase,
@@ -36,6 +38,10 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
 
   const isLostReport = !!lostDocumentCase;
   const isFoundReport = !!foundDocumentCase;
+  const isIntake = foundDocumentCase?.source === FoundCaseSource.STATION_INTAKE;
+  const { station: intakeStation } = useStation(
+    isIntake ? foundDocumentCase?.intakeStationId : null
+  );
 
   const CaseNotes = () => (
     <>
@@ -115,7 +121,10 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
                 leftSection={<TablerIcon name="circleCheck" size={14} />}
                 onClick={() => {
                   const dismiss = launchWorkspace(
-                    <VerifyFoundDocumentCaseForm documentCase={documentCase} onClose={() => dismiss()} />,
+                    <VerifyFoundDocumentCaseForm
+                      documentCase={documentCase}
+                      onClose={() => dismiss()}
+                    />,
                     { title: 'Verify Found Document Case' }
                   );
                 }}
@@ -131,7 +140,10 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
                 leftSection={<TablerIcon name="circleX" size={14} />}
                 onClick={() => {
                   const dismiss = launchWorkspace(
-                    <RejectFoundDocumentCaseForm documentCase={documentCase} onClose={() => dismiss()} />,
+                    <RejectFoundDocumentCaseForm
+                      documentCase={documentCase}
+                      onClose={() => dismiss()}
+                    />,
                     { title: 'Reject Found Document Case' }
                   );
                 }}
@@ -154,6 +166,22 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
             </Text>
             <StatusBadge status={foundDocumentCase?.status} />
           </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+            <Text size="sm" fw={600} c="dimmed" mb={4}>
+              How It Came In
+            </Text>
+            <Text>
+              {isIntake ? `Walk-in at ${intakeStation?.name ?? '—'}` : 'Reported by finder'}
+            </Text>
+          </Grid.Col>
+          {isIntake && (
+            <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+              <Text size="sm" fw={600} c="dimmed" mb={4}>
+                Finder's Phone
+              </Text>
+              <Text>{foundDocumentCase?.finderPhone || 'Not given'}</Text>
+            </Grid.Col>
+          )}
         </Grid>
         <CaseNotes />
       </Stack>

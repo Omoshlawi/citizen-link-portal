@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Button, Group, Select, Stack, Textarea } from '@mantine/core';
+import { Alert, Button, Group, Select, Stack, Textarea, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton, TablerIcon } from '@/components';
@@ -10,30 +10,41 @@ import { useAddresses } from '@/features/addresses/hooks';
 import { useDocumentTypes } from '@/features/admin/hooks';
 import { handleApiErrors, uploadFile } from '@/lib/api';
 import { ImageUpload, ImageUploadRef } from '../components';
-import { createFoundDocumentCase } from '../hooks';
-import { DocumentCase, FoundDocumentCaseFormData } from '../types';
-import { FoundDocumentCaseSchema } from '../utils';
+import { createStationIntakeCase } from '../hooks';
+import { DocumentCase, StationIntakeFormData } from '../types';
+import { StationIntakeSchema } from '../utils';
 
 type DocumentCaseFormProps = {
   closeWorkspace?: () => void;
   onSuccess?: (caseData: DocumentCase) => void;
 };
 
-const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormProps) => {
+/** Log a document a finder handed in at the counter; it lands in custody at the active station. */
+const StationIntakeForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormProps) => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const imageUploadRef = useRef<ImageUploadRef>(null);
   const navigate = useNavigate();
-  const form = useForm<FoundDocumentCaseFormData>({
+  const form = useForm<StationIntakeFormData>({
     defaultValues: { images: [] },
-    resolver: zodResolver(FoundDocumentCaseSchema),
+    resolver: zodResolver(StationIntakeSchema),
   });
   const { addresses, isLoading: isLoadingAddresses } = useAddresses();
   const { documentTypes, isLoading: isLoadingTypes } = useDocumentTypes();
 
-  const handleSubmit: SubmitHandler<FoundDocumentCaseFormData> = async (data) => {
+  const handleSubmit: SubmitHandler<StationIntakeFormData> = async (data) => {
     try {
       let imageUrls: string[] = [];
       const files = imageUploadRef.current?.getFiles() || [];
+
+      if (files.length === 0) {
+        showNotification({
+          title: 'Photo required',
+          message: 'Attach at least one photo of the document',
+          color: 'red',
+          position: 'top-right',
+        });
+        return;
+      }
 
       if (files.length > 0) {
         setUploadingImages(true);
@@ -69,27 +80,27 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
         images: imageUrls.length > 0 ? (imageUrls as [string, ...string[]]) : [],
       };
 
-      const doc = await createFoundDocumentCase(submitData);
+      const doc = await createStationIntakeCase(submitData);
       onSuccess?.(doc);
       showNotification({
-        title: 'Success',
+        title: 'Document received',
         color: 'green',
-        message: 'Found Document case created successfully',
+        message: `${doc.caseNumber} is now in custody at this station`,
       });
-      navigate(`/dashboard/cases/${doc.id}`);
+      navigate(`/dashboard/cases/${doc.id}/custody`);
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<FoundDocumentCaseFormData>(error);
+      const e = handleApiErrors<StationIntakeFormData>(error);
       if ('detail' in e && e.detail) {
         showNotification({
-          title: 'Error creating found document case',
+          title: 'Error receiving document',
           message: e.detail,
           color: 'red',
           position: 'top-right',
         });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof FoundDocumentCaseFormData, { message: val as string })
+          form.setError(key as keyof StationIntakeFormData, { message: val as string })
         );
       }
     }
@@ -102,6 +113,10 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
     >
       <Stack p="md" h="100%" justify="space-between" gap="lg">
         <Stack gap="md">
+          <Alert color="blue" variant="light" icon={<TablerIcon name="infoCircle" size={18} />}>
+            Use this when someone hands a found document in at the counter. It is recorded as
+            received at your active station, by you.
+          </Alert>
           <Controller
             control={form.control}
             name="typeId"
@@ -179,6 +194,22 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
             )}
           />
 
+          <Controller
+            control={form.control}
+            name="finderPhone"
+            render={({ field, fieldState }) => (
+              <TextInput
+                {...field}
+                value={field.value ?? ''}
+                label="Finder's phone number"
+                description="Optional. Ask the person first; it is only used to contact them about this document and is never shown to the owner."
+                placeholder="e.g. 0712345678"
+                error={fieldState.error?.message}
+                leftSection={<TablerIcon name="phone" size={18} />}
+              />
+            )}
+          />
+
           <ImageUpload
             ref={imageUploadRef}
             label="Document Images"
@@ -204,7 +235,7 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
             disabled={form.formState.isSubmitting || uploadingImages}
             leftSection={<TablerIcon name="check" size={18} />}
           >
-            Submit Found Case
+            Receive Document
           </Button>
         </Group>
       </Stack>
@@ -212,4 +243,4 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
   );
 };
 
-export default FoundDocumentCaseForm;
+export default StationIntakeForm;

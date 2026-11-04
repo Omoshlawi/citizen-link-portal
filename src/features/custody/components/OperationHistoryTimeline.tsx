@@ -31,6 +31,7 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
         const iconName = OPERATION_ICONS[op.operationType?.code ?? ''] ?? 'circle';
         const item = op.items.find((i) => i.foundCaseId === foundCaseId) ?? op.items[0];
         const isSystemRecorded = op.metadata?.source === 'EXCHANGE';
+        const isIntake = op.metadata?.source === 'INTAKE';
         const stationLabel = (() => {
           const code = op.operationType?.code;
           if (code === 'REQUISITION') {
@@ -81,6 +82,11 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
                 <Text size="xs" c="dimmed">
                   Recorded automatically · confirmed by handover code
                   {op.metadata?.exchangeNumber ? ` (${op.metadata.exchangeNumber})` : ''}
+                </Text>
+              )}
+              {isIntake && (
+                <Text size="xs" c="dimmed">
+                  Recorded automatically · walk-in document received at the station
                 </Text>
               )}
 

@@ -1,7 +1,17 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Link, Outlet, useSearchParams } from 'react-router-dom';
-import { Anchor, Badge, Button, Group, Select, Stack, Text, TextInput } from '@mantine/core';
+import {
+  Anchor,
+  Badge,
+  Button,
+  Group,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+  Tooltip,
+} from '@mantine/core';
 import {
   DashboardPageHeader,
   RouteTab,
@@ -12,9 +22,10 @@ import {
 } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import { useDocumentTypes } from '@/features/admin/hooks/useDocumentTypes';
+import { useCanPerformAtStation } from '@/features/custody/hooks/useCustody';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { formatDate } from '@/lib/utils/helpers';
-import { FoundDocumentCaseForm, LostDocumentCaseForm } from '../forms';
+import { LostDocumentCaseForm, StationIntakeForm } from '../forms';
 import { useDocumentCases } from '../hooks';
 import {
   CustodyStatus,
@@ -71,6 +82,9 @@ export const DocumentCasesTable = ({ type: activeTab }: { type: CaseTab }) => {
   } = useTableUrlFilters();
 
   const extractionStatus = searchParams.get('extractionStatus');
+  // Logging a walk-in records a RECEIPT at the active station, so it needs that grant
+  const { allowed: canReceive } = useCanPerformAtStation('RECEIPT');
+  const receiveHint = "You aren't granted Receipt at this station";
 
   const setExtractionStatus = (value: string | null) => {
     setSearchParams(
@@ -311,23 +325,26 @@ export const DocumentCasesTable = ({ type: activeTab }: { type: CaseTab }) => {
             >
               Report Lost
             </Button>
-            <Button
-              size="xs"
-              variant="light"
-              color="teal"
-              leftSection={<TablerIcon name="fileCheck" size={14} />}
-              onClick={() => {
-                const dismiss = launchWorkspace(
-                  <FoundDocumentCaseForm
-                    onSuccess={() => dismiss()}
-                    closeWorkspace={() => dismiss()}
-                  />,
-                  { title: 'Report Found Document' }
-                );
-              }}
-            >
-              Report Found
-            </Button>
+            <Tooltip label={receiveHint} disabled={canReceive}>
+              <Button
+                size="xs"
+                variant="light"
+                color="teal"
+                leftSection={<TablerIcon name="fileCheck" size={14} />}
+                disabled={!canReceive}
+                onClick={() => {
+                  const dismiss = launchWorkspace(
+                    <StationIntakeForm
+                      onSuccess={() => dismiss()}
+                      closeWorkspace={() => dismiss()}
+                    />,
+                    { title: 'Receive Walk-in Document' }
+                  );
+                }}
+              >
+                Receive Walk-in
+              </Button>
+            </Tooltip>
           </Group>
           <TextInput
             placeholder="Search cases..."

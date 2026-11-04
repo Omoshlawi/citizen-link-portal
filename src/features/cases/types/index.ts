@@ -3,7 +3,12 @@ import { z } from 'zod';
 import { Address } from '@/features/addresses/types';
 import { Station } from '@/features/custody/types';
 import { ExchangeStatus } from '@/features/exchange';
-import { CaseDocumentSchema, FoundDocumentCaseSchema, LostDocumentCaseSchema } from '../utils';
+import {
+  CaseDocumentSchema,
+  FoundDocumentCaseSchema,
+  LostDocumentCaseSchema,
+  StationIntakeSchema,
+} from '../utils';
 
 export interface DocumentCase {
   id: string;
@@ -97,10 +102,22 @@ export interface FoundDocumentCase {
   exchanges?: Array<{ status: ExchangeStatus; scheduledAt: string }>;
   currentStationId?: string;
   currentStation?: Station;
+  /** FINDER_APP: the reporter is the finder. STATION_INTAKE: a station logged a walk-in; no finder recorded. */
+  source?: FoundCaseSource;
+  /** STATION_INTAKE: the station the document was handed in at (fixed at intake). */
+  intakeStationId?: string | null;
+  intakeStation?: Station | null;
+  /** STATION_INTAKE: optional walk-in finder contact (subscriber digits). Staff only. */
+  finderPhone?: string | null;
   createdAt: string;
   updatedAt: string;
   pointAwarded: number;
   voided: boolean;
+}
+
+export enum FoundCaseSource {
+  FINDER_APP = 'FINDER_APP',
+  STATION_INTAKE = 'STATION_INTAKE',
 }
 export interface DocumentField {
   id: string;
@@ -299,6 +316,7 @@ export interface SecurityQuestion {
 }
 
 export type FoundDocumentCaseFormData = z.infer<typeof FoundDocumentCaseSchema>;
+export type StationIntakeFormData = z.infer<typeof StationIntakeSchema>;
 
 export type LostDocumentCaseFormData = z.infer<typeof LostDocumentCaseSchema>;
 export type CaseDocumentFormData = z.infer<typeof CaseDocumentSchema>;

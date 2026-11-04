@@ -72,6 +72,22 @@ const FoundDocumentCaseBaseSchema = z.object({
   scheduledPickupAt: z.string().datetime({ offset: true }).optional(),
 });
 
+/** A walk-in document logged by staff at their active station. */
+export const StationIntakeSchema = FoundDocumentCaseBaseSchema.pick({
+  typeId: true,
+  addressId: true,
+  eventDate: true,
+  tags: true,
+  description: true,
+  images: true,
+}).extend({
+  finderPhone: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || undefined),
+});
+
 export const FoundDocumentCaseSchema = FoundDocumentCaseBaseSchema.superRefine((data, ctx) => {
   if (data.submissionMethod === 'DROPOFF' && !data.pickupStationId) {
     ctx.addIssue({
@@ -101,4 +117,3 @@ export const FoundDocumentCaseSchema = FoundDocumentCaseBaseSchema.superRefine((
 export const LostDocumentCaseSchema = FoundDocumentCaseBaseSchema.omit({
   images: true,
 }).extend(CaseDocumentSchema.omit({ images: true }).shape);
-

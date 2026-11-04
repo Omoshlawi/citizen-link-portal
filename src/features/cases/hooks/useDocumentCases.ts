@@ -8,6 +8,7 @@ import {
   ExtractionStatus,
   FoundDocumentCaseFormData,
   LostDocumentCaseFormData,
+  StationIntakeFormData,
 } from '../types';
 
 export const useDocumentCases = (params: Record<string, any> = {}) => {
@@ -35,7 +36,9 @@ export const useDocumentCase = (reportId?: string) => {
       refreshInterval: (latest) => {
         const status = latest?.data?.extractions
           ?.slice()
-          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.extractionStatus;
+          .sort(
+            (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0]?.extractionStatus;
         return status === ExtractionStatus.PENDING || status === ExtractionStatus.IN_PROGRESS
           ? 3000
           : 0;
@@ -74,6 +77,15 @@ export const createFoundDocumentCase = async (payload: FoundDocumentCaseFormData
   });
   mutate('/documents/cases');
   return foundDocumentCase.data;
+};
+
+export const createStationIntakeCase = async (payload: StationIntakeFormData) => {
+  const intakeCase = await apiFetch<DocumentCase>('/documents/cases/found/intake', {
+    method: 'POST',
+    data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
+  });
+  mutate('/documents/cases');
+  return intakeCase.data;
 };
 
 export const updateFoundDocumentCase = async (
