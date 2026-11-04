@@ -15,9 +15,9 @@ const ANY_WRITE = ['create', 'update', 'delete', 'restore'];
  */
 export const PAGE_PERMISSIONS: Record<string, PermissionRule> = {
   // Case management
-  cases: { documentCase: ['list-any'] },
-  claims: { claim: ['list-any'] },
-  matches: { match: ['list-any'] },
+  cases: { documentCase: ['list-any', 'list-station'] },
+  claims: { claim: ['list-any', 'list-station'] },
+  matches: { match: ['list-any', 'list-station'] },
   'status-transitions': { statusTransition: ['view'] },
   'chat-reports': { chatReport: ['read'] },
 

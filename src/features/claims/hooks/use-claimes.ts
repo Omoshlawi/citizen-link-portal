@@ -1,13 +1,18 @@
 import useSWR from 'swr';
+import { useListScope } from '@/hooks/useListScope';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData } from '@/lib/api';
 import { Claim, RejectClaimFormData, VerifyClaimFormData } from '../types';
 
 export const useClaims = (paras: Record<string, any> = {}) => {
+  const { params: scope, ready } = useListScope('claims', { atActiveStation: true });
   const url = constructUrl('/claim', {
+    ...scope,
     v: 'custom:include(match,foundDocumentCase,user)',
     ...paras,
   });
-  const { data, error, isLoading } = useSWR<APIFetchResponse<PaginatedData<Claim>>>(url);
+  const { data, error, isLoading } = useSWR<APIFetchResponse<PaginatedData<Claim>>>(
+    ready ? url : null
+  );
   return {
     claims: data?.data?.results ?? [],
     totalCount: data?.data?.totalCount ?? 0,

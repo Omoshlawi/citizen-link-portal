@@ -820,6 +820,7 @@ export const AddressesTab = () => {
   };
 
   const addressQuery = useAddresses({
+    scope: 'all',
     page,
     limit: pageSize,
     search,

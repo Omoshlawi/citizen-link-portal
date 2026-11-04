@@ -35,6 +35,7 @@ const AddressesPage = () => {
   };
 
   const addressQuery = useAddresses({
+    scope: 'all',
     page,
     limit: pageSize,
     search,

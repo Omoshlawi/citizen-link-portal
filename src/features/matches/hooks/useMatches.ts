@@ -1,14 +1,19 @@
 import useSWR from 'swr';
 import { DocumentCase } from '@/features/cases/types';
+import { useListScope } from '@/hooks/useListScope';
 import { APIFetchResponse, constructUrl, PaginatedData } from '@/lib/api';
 import { Match } from '../types';
 
 export const useMatches = (params: Record<string, any> = {}) => {
+  const { params: scope, ready } = useListScope('matches', { atActiveStation: true });
   const url = constructUrl('/matching', {
+    ...scope,
     v: 'custom:include(lostDocumentCase:include(case:include(document:include(type))),foundDocumentCase:include(case:include(document:include(type))))',
     ...params,
   });
-  const { data, error, isLoading, mutate } = useSWR<APIFetchResponse<PaginatedData<Match>>>(url);
+  const { data, error, isLoading, mutate } = useSWR<APIFetchResponse<PaginatedData<Match>>>(
+    ready ? url : null
+  );
   return {
     matches: data?.data?.results ?? [],
     totalCount: data?.data?.totalCount ?? 0,
@@ -34,12 +39,14 @@ export const useMatch = (matchId?: string) => {
   };
 };
 
-export const useSemanticMatches = (params: {
-  caseRef?: string;
-  type?: 'lost' | 'found';
-  minMatchScore?: number;
-  limit?: number;
-} = {}) => {
+export const useSemanticMatches = (
+  params: {
+    caseRef?: string;
+    type?: 'lost' | 'found';
+    minMatchScore?: number;
+    limit?: number;
+  } = {}
+) => {
   const { caseRef, type, minMatchScore, limit } = params;
 
   const lostUrl =
@@ -62,10 +69,16 @@ export const useSemanticMatches = (params: {
         })
       : null;
 
-  const { data: lostData, isLoading: lostLoading, error: lostError } =
-    useSWR<APIFetchResponse<{ results: DocumentCase[] }>>(lostUrl);
-  const { data: foundData, isLoading: foundLoading, error: foundError } =
-    useSWR<APIFetchResponse<{ results: DocumentCase[] }>>(foundUrl);
+  const {
+    data: lostData,
+    isLoading: lostLoading,
+    error: lostError,
+  } = useSWR<APIFetchResponse<{ results: DocumentCase[] }>>(lostUrl);
+  const {
+    data: foundData,
+    isLoading: foundLoading,
+    error: foundError,
+  } = useSWR<APIFetchResponse<{ results: DocumentCase[] }>>(foundUrl);
 
   const results = lostData?.data?.results ?? foundData?.data?.results ?? [];
   return {

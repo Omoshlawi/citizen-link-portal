@@ -62,7 +62,7 @@ type UserAddressesProps = {
 const UserAddresses: React.FC<UserAddressesProps> = ({ userId }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const addressesAsync = useAddresses({ userId, page, limit: pageSize });
+  const addressesAsync = useAddresses({ scope: 'all', userId, page, limit: pageSize });
 
   return (
     <Stack gap="md">

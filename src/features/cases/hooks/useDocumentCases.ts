@@ -1,8 +1,10 @@
 import dayjs from 'dayjs';
 import { StatusTransitionReasonFormData } from '@/features/status-transitions/types';
+import { useListScope } from '@/hooks/useListScope';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
 import {
   CaseDocumentFormData,
+  CustodyCandidate,
   DocumentCase,
   DocumentImage,
   ExtractionStatus,
@@ -12,9 +14,11 @@ import {
 } from '../types';
 
 export const useDocumentCases = (params: Record<string, any> = {}) => {
-  const url = constructUrl(`/documents/cases`, params);
-  const { data, error, mutate, isLoading } =
-    useApi<APIFetchResponse<PaginatedData<DocumentCase>>>(url);
+  const { params: scope, ready } = useListScope('cases', { atActiveStation: true });
+  const url = constructUrl(`/documents/cases`, { ...scope, ...params });
+  const { data, error, mutate, isLoading } = useApi<APIFetchResponse<PaginatedData<DocumentCase>>>(
+    ready ? url : null
+  );
   return {
     reports: data?.data?.results ?? [],
     totalCount: data?.data?.totalCount ?? 0,
@@ -25,6 +29,13 @@ export const useDocumentCases = (params: Record<string, any> = {}) => {
     mutate,
   };
 };
+/** Found cases to add to a custody operation. Minimal fields, reachable across stations. */
+export const useCustodyCandidates = (params: Record<string, any> = {}) => {
+  const url = constructUrl(`/documents/cases/custody-candidates`, params);
+  const { data, isLoading } = useApi<APIFetchResponse<PaginatedData<CustodyCandidate>>>(url);
+  return { cases: data?.data?.results ?? [], isLoading };
+};
+
 export const useDocumentCase = (reportId?: string) => {
   const url = constructUrl(`/documents/cases/${reportId}`, {
     v: 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type, images),document:include(additionalFields),address:include(locale),extractions)',

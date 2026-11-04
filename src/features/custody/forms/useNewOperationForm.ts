@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form';
 import { showNotification } from '@mantine/notifications';
-import { useDocumentCases } from '@/features/cases/hooks';
+import { useCustodyCandidates } from '@/features/cases/hooks';
 import { CaseType, FoundDocumentCaseStatus } from '@/features/cases/types';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import { authClient, handleApiErrors } from '@/lib/api';
@@ -87,7 +87,7 @@ export const useNewOperationForm = ({
   selectedOpTypeRef.current = selectedOpType;
 
   //  Case fetching — filtered based on operation type
-  const { reports: cases, isLoading: casesLoading } = useDocumentCases({
+  const { cases, isLoading: casesLoading } = useCustodyCandidates({
     caseType: CaseType.FOUND,
     limit: 8,
     ...(caseSearch && { search: caseSearch }),
@@ -110,7 +110,6 @@ export const useNewOperationForm = ({
         status: FoundDocumentCaseStatus.DRAFT,
         ...(watchedTargetArea && { collectionArea: watchedTargetArea }),
       }),
-    v: 'custom:include(foundDocumentCase,document:include(type))',
   });
 
   const operationTypeOptions = useMemo(

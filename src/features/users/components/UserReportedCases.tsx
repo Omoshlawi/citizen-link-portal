@@ -73,6 +73,7 @@ const UserReportedCases: React.FC<UserReportedCasesProps> = ({ userId }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const casesAsync = useDocumentCases({
+    scope: 'all',
     userId,
     page,
     limit: pageSize,

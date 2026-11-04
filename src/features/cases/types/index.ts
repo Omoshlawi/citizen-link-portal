@@ -320,3 +320,11 @@ export type StationIntakeFormData = z.infer<typeof StationIntakeSchema>;
 
 export type LostDocumentCaseFormData = z.infer<typeof LostDocumentCaseSchema>;
 export type CaseDocumentFormData = z.infer<typeof CaseDocumentSchema>;
+
+/** A found case offered by the custody operation pickers. */
+export interface CustodyCandidate {
+  id: string;
+  caseNumber: string;
+  foundDocumentCase: { id: string } | null;
+  document: { type: { name: string } | null } | null;
+}

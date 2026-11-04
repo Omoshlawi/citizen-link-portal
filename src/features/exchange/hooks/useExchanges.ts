@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import { useListScope } from '@/hooks/useListScope';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData } from '@/lib/api';
 import {
   ActiveExchangeState,
@@ -11,7 +12,9 @@ import {
 } from '../types';
 
 export const useExchanges = (params: Record<string, any> = {}, enabled = true) => {
+  const { params: scope, ready } = useListScope('exchanges');
   const url = constructUrl('/exchange', {
+    ...scope,
     v: 'custom:include(verifications,station,address,createdBy,completedBy,cancelledBy)',
     ...params,
   });
@@ -20,19 +23,22 @@ export const useExchanges = (params: Record<string, any> = {}, enabled = true) =
     error,
     isLoading,
     mutate: swrMutate,
-  } = useSWR<APIFetchResponse<PaginatedData<DocumentExchange>>>(enabled ? url : null);
+  } = useSWR<APIFetchResponse<PaginatedData<DocumentExchange>>>(enabled && ready ? url : null);
   return { exchanges: data?.data?.results ?? [], isLoading, error, mutate: swrMutate };
 };
 
 export const useActiveExchange = (foundCaseId?: string) => {
-  const url = foundCaseId
-    ? constructUrl('/exchange', {
-        active: true,
-        direction: ExchangeDirection.INBOUND,
-        foundCaseId,
-        v: 'custom:include(verifications)',
-      })
-    : null;
+  const { params: scope, ready } = useListScope('exchanges');
+  const url =
+    foundCaseId && ready
+      ? constructUrl('/exchange', {
+          ...scope,
+          active: true,
+          direction: ExchangeDirection.INBOUND,
+          foundCaseId,
+          v: 'custom:include(verifications)',
+        })
+      : null;
 
   const {
     data,
@@ -78,14 +84,17 @@ export const useActiveExchange = (foundCaseId?: string) => {
 };
 
 export const useActiveOutboundExchange = (claimId?: string) => {
-  const url = claimId
-    ? constructUrl('/exchange', {
-        active: true,
-        direction: ExchangeDirection.OUTBOUND,
-        claimId,
-        v: 'custom:include(verifications,foundCase)',
-      })
-    : null;
+  const { params: scope, ready } = useListScope('exchanges');
+  const url =
+    claimId && ready
+      ? constructUrl('/exchange', {
+          ...scope,
+          active: true,
+          direction: ExchangeDirection.OUTBOUND,
+          claimId,
+          v: 'custom:include(verifications,foundCase)',
+        })
+      : null;
 
   const {
     data,
@@ -135,14 +144,17 @@ export const useActiveOutboundExchange = (claimId?: string) => {
 };
 
 export const useDocumentExchanges = (foundCaseId?: string) => {
-  const url = foundCaseId
-    ? constructUrl('/exchange', {
-        foundCaseId,
-        orderBy: '-createdAt',
-        limit: 50,
-        v: 'custom:include(station,address,createdBy,completedBy,cancelledBy)',
-      })
-    : null;
+  const { params: scope, ready } = useListScope('exchanges');
+  const url =
+    foundCaseId && ready
+      ? constructUrl('/exchange', {
+          ...scope,
+          foundCaseId,
+          orderBy: '-createdAt',
+          limit: 50,
+          v: 'custom:include(station,address,createdBy,completedBy,cancelledBy)',
+        })
+      : null;
   const {
     data,
     isLoading,

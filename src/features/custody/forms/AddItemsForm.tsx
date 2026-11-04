@@ -14,7 +14,7 @@ import {
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
-import { useDocumentCases } from '@/features/cases/hooks';
+import { useCustodyCandidates } from '@/features/cases/hooks';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import { handleApiErrors } from '@/lib/api';
 import { addOperationItem } from '../hooks/useCustody';
@@ -43,11 +43,10 @@ const AddItemsForm: React.FC<AddItemsFormProps> = ({
 
   const combobox = useCombobox({ onDropdownClose: () => combobox.resetSelectedOption() });
 
-  const { reports: cases, isLoading: casesLoading } = useDocumentCases({
+  const { cases, isLoading: casesLoading } = useCustodyCandidates({
     caseType: 'FOUND',
     limit: 20,
     ...(caseSearch && { search: caseSearch }),
-    v: 'custom:include(foundDocumentCase,document:include(type))',
     currentStationId:
       operation.operationType?.code === DocumentOperationTypeCode.REQUISITION
         ? stationId
