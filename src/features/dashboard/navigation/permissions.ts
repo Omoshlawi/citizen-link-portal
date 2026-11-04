@@ -31,15 +31,25 @@ export const PAGE_PERMISSIONS: Record<string, PermissionRule> = {
   'document-types': { documentType: ANY_WRITE },
   'status-transition-reasons': { transitionReason: ANY_WRITE },
   templates: { templates: ANY_WRITE },
-  iam: { setting: ['manage-system'] },
+  iam: { iam: ['manage'] },
   // User detail is reached from the IAM users tab.
-  users: { setting: ['manage-system'] },
+  users: { iam: ['manage'] },
   'system-settings': { setting: ['view-any', 'manage-system'] },
   'address-management': {
     addressHierarchy: ANY_WRITE,
     addressLocale: ANY_WRITE,
     address: ['view-any'],
   },
+};
+
+/**
+ * Staff who work at a station: they check in to one before using the dashboard. Everyone else
+ * (casework, back office, admin) works across stations, and the API requires an active station
+ * only on these actions.
+ */
+export const STATION_WORK: PermissionRule = {
+  documentOperation: ['manage'],
+  documentCase: ['collect', 'lookup'],
 };
 
 export const hasAnyPermission = (effective: EffectivePermissions, rule?: PermissionRule) =>

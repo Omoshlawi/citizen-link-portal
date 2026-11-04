@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge, Button, Grid, Group, Stack, Text } from '@mantine/core';
 import { launchWorkspace, SectionTitle, StatusBadge, TablerIcon } from '@/components';
 import { useStation } from '@/features/custody/hooks/useStations';
-import { useUserHasSystemAccessSync } from '@/hooks/useSystemAccess';
+import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
 import {
@@ -33,8 +33,8 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
   foundDocumentCase,
   documentCase,
 }) => {
-  const { hasAccess: canVerify } = useUserHasSystemAccessSync({ documentCase: ['verify'] });
-  const { hasAccess: canReject } = useUserHasSystemAccessSync({ documentCase: ['reject'] });
+  const { hasAccess: canVerify } = useUserHasSystemAccess({ documentCase: ['verify'] });
+  const { hasAccess: canReject } = useUserHasSystemAccess({ documentCase: ['reject'] });
 
   const isLostReport = !!lostDocumentCase;
   const isFoundReport = !!foundDocumentCase;

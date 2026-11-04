@@ -1,6 +1,8 @@
 import { FC, PropsWithChildren, useEffect, useMemo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Center, Loader } from '@mantine/core';
+import { useMyPermissions } from '@/features/admin/hooks/useRoleRecords';
+import { hasAnyPermission, STATION_WORK } from '@/features/dashboard/navigation/permissions';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import { useMyStations } from '@/hooks/useMyStations';
 import { usePreferredStationSetting } from '@/hooks/usePreferredStation';
@@ -8,7 +10,8 @@ import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { authClient } from '@/lib/api';
 
 /**
- * Ensures the session has a station the user may operate from.
+ * Ensures staff who work at a station have a session station they may operate from. Staff who
+ * do no station work pass straight through.
  * Staff with grants: station must appear in `/operation-scope/mine`.
  * Users with `documentOperationType: manage` may check in to any station (same rule as
  * {@link StationSelectionPage}); session `stationId` is validated via `/stations/:id`.
@@ -19,6 +22,7 @@ import { authClient } from '@/lib/api';
 
 const StationContextRequired: FC<PropsWithChildren> = ({ children }) => {
   const { data: sessionData, isPending: sessionPending } = authClient.useSession();
+  const { permissions, isLoading: permissionsLoading } = useMyPermissions();
   const { stations, isLoading: stationsLoading } = useMyStations();
   const { preferredStationId, isLoading: prefLoading } = usePreferredStationSetting();
   const { setStation, activeStation, isLoading: activeStationLoading } = useActiveStation();
@@ -103,7 +107,12 @@ const StationContextRequired: FC<PropsWithChildren> = ({ children }) => {
   const awaitingManageBypass =
     sessionStationNotInMine && (managePermLoading || (canManageAnyStation && activeStationLoading));
 
+  if (!permissionsLoading && !hasAnyPermission(permissions, STATION_WORK)) {
+    return <>{children}</>;
+  }
+
   if (
+    permissionsLoading ||
     sessionPending ||
     stationsLoading ||
     prefLoading ||

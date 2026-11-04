@@ -367,7 +367,7 @@ export const RolesTab = () => {
     useTableUrlFilters();
   const rolesAsync = useRoleRecords({ page, limit: pageSize, search, includeVoided: true });
   const { deleteRole, restoreRole, mutateRoles } = useRoleRecordsApi();
-  const { hasAccess } = useUserHasSystemAccess({ setting: ['manage-system'] });
+  const { hasAccess } = useUserHasSystemAccess({ iam: ['manage'] });
 
   const handleDelete = (role: RoleRecord) => {
     modals.openConfirmModal({
@@ -455,6 +455,11 @@ export const RolesTab = () => {
             <Text size="xs" c="dimmed" ff="monospace">
               {original.slug}
             </Text>
+            {original.description && (
+              <Text size="xs" c="dimmed" maw={420} style={{ whiteSpace: 'normal' }}>
+                {original.description}
+              </Text>
+            )}
           </Stack>
         ),
       },
@@ -509,7 +514,7 @@ export const RolesTab = () => {
                 <Menu.Label>Actions</Menu.Label>
                 <Menu.Divider />
                 <SystemAuthorized
-                  permissions={{ setting: ['manage-system'] }}
+                  permissions={{ iam: ['manage'] }}
                   unauthorizedAction={{ type: 'hide' }}
                 >
                   <Menu.Item
@@ -521,7 +526,7 @@ export const RolesTab = () => {
                 </SystemAuthorized>
                 {!original.voided && (
                   <SystemAuthorized
-                    permissions={{ setting: ['manage-system'] }}
+                    permissions={{ iam: ['manage'] }}
                     unauthorizedAction={{ type: 'hide' }}
                   >
                     <Menu.Item
@@ -535,7 +540,7 @@ export const RolesTab = () => {
                 )}
                 {original.voided && (
                   <SystemAuthorized
-                    permissions={{ setting: ['manage-system'] }}
+                    permissions={{ iam: ['manage'] }}
                     unauthorizedAction={{ type: 'hide' }}
                   >
                     <Menu.Item
