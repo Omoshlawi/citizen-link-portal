@@ -30,14 +30,8 @@ import { handleApiErrors } from '@/lib/api';
 import { BanUserForm, CreateUserForm, SetRoleForm } from '../../users/forms';
 import { useUsers, useUsersApi } from '../../users/hooks';
 import { User } from '../../users/types';
-import { ResourceForm } from '../forms/ResourceForm';
 import { RoleForm } from '../forms/RoleForm';
-import {
-  useResources,
-  useResourcesApi,
-  useRoleRecords,
-  useRoleRecordsApi,
-} from '../hooks/useRoleRecords';
+import { useResources, useRoleRecords, useRoleRecordsApi } from '../hooks/useRoleRecords';
 import { Resource, RoleRecord } from '../types';
 
 // ─── Users tab ────────────────────────────────────────────────────────────────
@@ -468,7 +462,7 @@ export const RolesTab = () => {
         header: 'Type',
         id: 'type',
         cell: ({ row: { original } }) =>
-          !original.canDelete ? (
+          original.isSystem ? (
             <Badge size="xs" variant="dot" color="gray">
               System
             </Badge>
@@ -503,58 +497,59 @@ export const RolesTab = () => {
         id: 'actions',
         header: '',
         size: 0,
-        cell: ({ row: { original } }) => (
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <ActionIcon variant="subtle">
-                <TablerIcon name="dots" size={16} />
-              </ActionIcon>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Label>Actions</Menu.Label>
-              <Menu.Divider />
-              <SystemAuthorized
-                permissions={{ setting: ['manage-system'] }}
-                unauthorizedAction={{ type: 'hide' }}
-              >
-                <Menu.Item
-                  leftSection={<TablerIcon name="edit" size={14} />}
-                  onClick={() => handleLaunchFormWorkspace(original)}
-                >
-                  Edit
-                </Menu.Item>
-              </SystemAuthorized>
-              {!original.voided && original.canDelete && (
+        cell: ({ row: { original } }) =>
+          original.isSystem ? null : (
+            <Menu shadow="md" width={200}>
+              <Menu.Target>
+                <ActionIcon variant="subtle">
+                  <TablerIcon name="dots" size={16} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>Actions</Menu.Label>
+                <Menu.Divider />
                 <SystemAuthorized
                   permissions={{ setting: ['manage-system'] }}
                   unauthorizedAction={{ type: 'hide' }}
                 >
                   <Menu.Item
-                    color="red"
-                    leftSection={<TablerIcon name="trash" size={14} />}
-                    onClick={() => handleDelete(original)}
+                    leftSection={<TablerIcon name="edit" size={14} />}
+                    onClick={() => handleLaunchFormWorkspace(original)}
                   >
-                    Delete
+                    Edit
                   </Menu.Item>
                 </SystemAuthorized>
-              )}
-              {original.voided && (
-                <SystemAuthorized
-                  permissions={{ setting: ['manage-system'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
-                  <Menu.Item
-                    color="green"
-                    leftSection={<TablerIcon name="history" size={14} />}
-                    onClick={() => handleRestore(original)}
+                {!original.voided && (
+                  <SystemAuthorized
+                    permissions={{ setting: ['manage-system'] }}
+                    unauthorizedAction={{ type: 'hide' }}
                   >
-                    Restore
-                  </Menu.Item>
-                </SystemAuthorized>
-              )}
-            </Menu.Dropdown>
-          </Menu>
-        ),
+                    <Menu.Item
+                      color="red"
+                      leftSection={<TablerIcon name="trash" size={14} />}
+                      onClick={() => handleDelete(original)}
+                    >
+                      Delete
+                    </Menu.Item>
+                  </SystemAuthorized>
+                )}
+                {original.voided && (
+                  <SystemAuthorized
+                    permissions={{ setting: ['manage-system'] }}
+                    unauthorizedAction={{ type: 'hide' }}
+                  >
+                    <Menu.Item
+                      color="green"
+                      leftSection={<TablerIcon name="history" size={14} />}
+                      onClick={() => handleRestore(original)}
+                    >
+                      Restore
+                    </Menu.Item>
+                  </SystemAuthorized>
+                )}
+              </Menu.Dropdown>
+            </Menu>
+          ),
       },
     ],
     []
@@ -579,11 +574,10 @@ export const RolesTab = () => {
         const permTree = original.permissions.reduce<
           Record<string, { resourceName: string; actions: typeof original.permissions }>
         >((acc, perm) => {
-          const key = perm.resource.slug;
-          if (!acc[key]) {
-            acc[key] = { resourceName: perm.resource.name, actions: [] };
+          if (!acc[perm.resource]) {
+            acc[perm.resource] = { resourceName: perm.resourceName, actions: [] };
           }
-          acc[key].actions.push(perm);
+          acc[perm.resource].actions.push(perm);
           return acc;
         }, {});
 
@@ -613,13 +607,13 @@ export const RolesTab = () => {
                     </Group>
                     <Stack gap={4} pl="lg" mt={4}>
                       {node.actions.map((perm) => (
-                        <Group key={perm.id} gap="xs">
+                        <Group key={perm.action} gap="xs">
                           <Text size="sm" c="dimmed">
                             └─
                           </Text>
-                          <Text size="sm">{perm.resourceAction.name}</Text>
+                          <Text size="sm">{perm.actionName}</Text>
                           <Text size="xs" ff="monospace" c="dimmed">
-                            {perm.resourceAction.slug}
+                            {perm.action}
                           </Text>
                         </Group>
                       ))}
@@ -649,56 +643,7 @@ export const RolesTab = () => {
 export const ResourcesTab = () => {
   const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
     useTableUrlFilters();
-  const resourcesAsync = useResources({ page, limit: pageSize, search, includeVoided: true });
-  const { deleteResource, restoreResource, mutateResources } = useResourcesApi();
-  const { hasAccess } = useUserHasSystemAccess({ setting: ['manage-system'] });
-
-  const handleDelete = (resource: Resource) => {
-    modals.openConfirmModal({
-      title: 'Delete Resource',
-      centered: true,
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete <b>{resource.name}</b>? All associated actions and role
-          permissions will also be removed.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
-      onConfirm: async () => {
-        try {
-          await deleteResource(resource.id);
-          showNotification({ title: 'Success', message: 'Resource deleted', color: 'green' });
-          mutateResources();
-        } catch (error) {
-          const e = handleApiErrors(error);
-          showNotification({
-            title: 'Error',
-            message: e.detail || 'Failed to delete',
-            color: 'red',
-          });
-        }
-      },
-    });
-  };
-
-  const handleRestore = async (resource: Resource) => {
-    try {
-      await restoreResource(resource.id);
-      showNotification({ title: 'Success', message: 'Resource restored', color: 'green' });
-      mutateResources();
-    } catch (error) {
-      const e = handleApiErrors(error);
-      showNotification({ title: 'Error', message: e.detail || 'Failed to restore', color: 'red' });
-    }
-  };
-
-  const handleLaunchFormWorkspace = (resource?: Resource) => {
-    const closeWorkspace = launchWorkspace(
-      <ResourceForm resource={resource} closeWorkspace={() => closeWorkspace()} />,
-      { width: 'wide', title: resource ? 'Edit Resource' : 'Create Resource' }
-    );
-  };
+  const resourcesAsync = useResources({ page, limit: pageSize, search });
 
   const columns = useMemo<ColumnDef<Resource>[]>(
     () => [
@@ -743,96 +688,18 @@ export const ResourcesTab = () => {
         ),
       },
       {
-        header: 'Type',
-        id: 'type',
-        cell: ({ row: { original } }) =>
-          original.isBuiltIn ? (
-            <Badge size="xs" variant="dot" color="gray">
-              Built-in
-            </Badge>
-          ) : (
-            <Badge size="xs" variant="dot" color="blue">
-              Custom
-            </Badge>
-          ),
+        header: 'Description',
+        accessorKey: 'description',
+        cell: ({ row: { original } }) => (
+          <Text size="sm" c="dimmed">
+            {original.description}
+          </Text>
+        ),
       },
       {
         header: 'Actions',
         id: 'actions_count',
-        cell: ({ row: { original } }) => (
-          <Badge variant="light">{original.actions.filter((a) => !a.voided).length}</Badge>
-        ),
-      },
-      {
-        header: 'Status',
-        accessorKey: 'voided',
-        cell: ({ row: { original } }) =>
-          original.voided ? (
-            <Badge size="xs" color="red">
-              Voided
-            </Badge>
-          ) : (
-            <Badge size="xs" color="green">
-              Active
-            </Badge>
-          ),
-      },
-      {
-        id: 'actions',
-        header: '',
-        size: 0,
-        cell: ({ row: { original } }) => (
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <ActionIcon variant="subtle">
-                <TablerIcon name="dots" size={16} />
-              </ActionIcon>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Label>Actions</Menu.Label>
-              <Menu.Divider />
-              <SystemAuthorized
-                permissions={{ setting: ['manage-system'] }}
-                unauthorizedAction={{ type: 'hide' }}
-              >
-                <Menu.Item
-                  leftSection={<TablerIcon name="edit" size={14} />}
-                  onClick={() => handleLaunchFormWorkspace(original)}
-                >
-                  Edit
-                </Menu.Item>
-              </SystemAuthorized>
-              {!original.voided && !original.isBuiltIn && (
-                <SystemAuthorized
-                  permissions={{ setting: ['manage-system'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
-                  <Menu.Item
-                    color="red"
-                    leftSection={<TablerIcon name="trash" size={14} />}
-                    onClick={() => handleDelete(original)}
-                  >
-                    Delete
-                  </Menu.Item>
-                </SystemAuthorized>
-              )}
-              {original.voided && (
-                <SystemAuthorized
-                  permissions={{ setting: ['manage-system'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
-                  <Menu.Item
-                    color="green"
-                    leftSection={<TablerIcon name="history" size={14} />}
-                    onClick={() => handleRestore(original)}
-                  >
-                    Restore
-                  </Menu.Item>
-                </SystemAuthorized>
-              )}
-            </Menu.Dropdown>
-          </Menu>
-        ),
+        cell: ({ row: { original } }) => <Badge variant="light">{original.actions.length}</Badge>,
       },
     ],
     []
@@ -859,39 +726,27 @@ export const ResourcesTab = () => {
             <Text size="sm" fw={600}>
               {original.name} Actions
             </Text>
-            {original.actions.length === 0 ? (
-              <Text size="sm" c="dimmed">
-                No actions defined.
-              </Text>
-            ) : (
-              original.actions.map((action) => (
-                <Box key={action.id}>
-                  <Group gap="xs">
-                    <Text size="sm" c="dimmed">
-                      └─
+            {original.actions.map((action) => (
+              <Box key={action.slug}>
+                <Group gap="xs">
+                  <Text size="sm" c="dimmed">
+                    └─
+                  </Text>
+                  <Text size="sm">{action.name}</Text>
+                  <Text size="xs" ff="monospace" c="dimmed">
+                    {action.slug}
+                  </Text>
+                  {action.description && (
+                    <Text size="xs" c="dimmed">
+                      {action.description}
                     </Text>
-                    <Text size="sm">{action.name}</Text>
-                    <Text size="xs" ff="monospace" c="dimmed">
-                      {action.slug}
-                    </Text>
-                    {action.isBuiltIn && (
-                      <Badge size="xs" variant="dot" color="gray">
-                        Built-in
-                      </Badge>
-                    )}
-                    {action.voided && (
-                      <Badge size="xs" color="red">
-                        Voided
-                      </Badge>
-                    )}
-                  </Group>
-                </Box>
-              ))
-            )}
+                  )}
+                </Group>
+              </Box>
+            ))}
           </Stack>
         </Paper>
       )}
-      onAdd={hasAccess ? () => handleLaunchFormWorkspace() : undefined}
       pagination={{
         totalCount: resourcesAsync.totalCount,
         currentPage: page,
@@ -899,7 +754,7 @@ export const ResourcesTab = () => {
         onChange: setPage,
         onPageSizeChange: setPageSize,
       }}
-      nothingFoundMessage="No resources configured."
+      nothingFoundMessage="No resources match your search."
     />
   );
 };
@@ -917,7 +772,7 @@ const IAMPage = () => (
   <Stack gap="md">
     <DashboardPageHeader
       title="Access Control"
-      subTitle="Manage users, roles, permissions, and resources"
+      subTitle="Manage users and roles, and view the privileges they can hold"
       icon="shieldLock"
     />
     <RouteTabs basePath="/dashboard/iam" tabs={TABS} />

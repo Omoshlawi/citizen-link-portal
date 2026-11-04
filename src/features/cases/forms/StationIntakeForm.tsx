@@ -16,7 +16,7 @@ import { StationIntakeSchema } from '../utils';
 
 type DocumentCaseFormProps = {
   closeWorkspace?: () => void;
-  onSuccess?: (caseData: DocumentCase) => void;
+  onSuccess?: (caseData: Pick<DocumentCase, 'id' | 'caseNumber'>) => void;
 };
 
 /** Log a document a finder handed in at the counter; it lands in custody at the active station. */

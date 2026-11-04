@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
-  Badge,
   Box,
   Button,
   Checkbox,
@@ -13,18 +12,20 @@ import {
   Text,
   Textarea,
   TextInput,
-  Tooltip,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { useResources, useRoleRecordsApi } from '../hooks/useRoleRecords';
-import { RoleFormData, RoleRecord } from '../types';
+import { PermissionGrant, RoleFormData, RoleRecord } from '../types';
 import { RoleSchema } from '../utils';
 
 interface RoleFormProps {
   role?: RoleRecord;
   closeWorkspace: () => void;
+}
+
+function grantKey({ resource, action }: PermissionGrant): string {
+  return `${resource}:${action}`;
 }
 
 function slugify(name: string): string {
@@ -38,11 +39,8 @@ export const RoleForm: React.FC<RoleFormProps> = ({ role, closeWorkspace }) => {
   const { createRole, updateRole, setRolePermissions, mutateRoles } = useRoleRecordsApi();
   const { resources } = useResources();
 
-  // Selected resourceActionIds
-  const initialSelected = useMemo(
-    () => new Set(role?.permissions.map((p) => p.resourceActionId) ?? []),
-    [role]
-  );
+  // Selected privileges, as grantKey strings
+  const initialSelected = useMemo(() => new Set(role?.permissions.map(grantKey) ?? []), [role]);
   const [selected, setSelected] = useState<Set<string>>(initialSelected);
 
   const form = useForm<RoleFormData>({
@@ -62,13 +60,13 @@ export const RoleForm: React.FC<RoleFormProps> = ({ role, closeWorkspace }) => {
     }
   }, [nameValue, role, form]);
 
-  const toggleAction = (actionId: string) => {
+  const toggleGrant = (key: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(actionId)) {
-        next.delete(actionId);
+      if (next.has(key)) {
+        next.delete(key);
       } else {
-        next.add(actionId);
+        next.add(key);
       }
       return next;
     });
@@ -76,9 +74,15 @@ export const RoleForm: React.FC<RoleFormProps> = ({ role, closeWorkspace }) => {
 
   const handleSubmit: SubmitHandler<RoleFormData> = async (data) => {
     try {
-      const saved = role ? await updateRole(role.id, data) : await createRole(data);
+      const { slug: _slug, ...editable } = data;
+      const saved = role ? await updateRole(role.id, editable) : await createRole(data);
+      const permissions = resources.flatMap((resource) =>
+        resource.actions
+          .map((action) => ({ resource: resource.slug, action: action.slug }))
+          .filter((grant) => selected.has(grantKey(grant)))
+      );
 
-      await setRolePermissions(saved!.id, Array.from(selected));
+      await setRolePermissions(saved!.id, permissions);
 
       showNotification({
         title: 'Success',
@@ -98,9 +102,6 @@ export const RoleForm: React.FC<RoleFormProps> = ({ role, closeWorkspace }) => {
       }
     }
   };
-
-  const isSystem = role && !role.canDelete;
-  const canEditPerms = !role || role.canEditPermissions;
 
   return (
     <form
@@ -130,9 +131,9 @@ export const RoleForm: React.FC<RoleFormProps> = ({ role, closeWorkspace }) => {
                 {...field}
                 label="Slug"
                 placeholder="e.g. finance-officer"
-                description="Used in user.role — must be kebab-case"
+                description="Used in user.role — must be kebab-case, and cannot change once created"
                 error={fieldState.error?.message}
-                readOnly={!!isSystem}
+                readOnly={!!role}
                 required
               />
             )}
@@ -153,63 +154,44 @@ export const RoleForm: React.FC<RoleFormProps> = ({ role, closeWorkspace }) => {
 
           <Divider label="Permissions" labelPosition="left" />
 
-          {!canEditPerms ? (
-            <Text size="sm" c="dimmed">
-              Permissions for this role are managed automatically.
-            </Text>
-          ) : (
-            <ScrollArea h={360} offsetScrollbars>
-              <Stack gap="sm">
-                {resources.map((resource) => {
-                  const activeActions = resource.actions.filter((a) => !a.voided);
-                  if (activeActions.length === 0) {
-                    return null;
-                  }
-                  return (
-                    <Box key={resource.id}>
-                      <Group gap="xs" mb={4}>
-                        <Text size="sm" fw={600}>
-                          {resource.name}
-                        </Text>
-                        <Text size="xs" ff="monospace" c="dimmed">
-                          {resource.slug}
-                        </Text>
-                        {resource.isBuiltIn && (
-                          <Tooltip label="Built-in resource">
-                            <Badge size="xs" variant="dot" color="gray">
-                              Built-in
-                            </Badge>
-                          </Tooltip>
-                        )}
-                      </Group>
-                      <Stack gap={2} pl="sm">
-                        {activeActions.map((action) => (
-                          <Group key={action.id} gap="xs">
-                            <Checkbox
-                              size="xs"
-                              checked={selected.has(action.id)}
-                              onChange={() => toggleAction(action.id)}
-                              label={
-                                <Group gap={4}>
-                                  <Text size="xs">{action.name}</Text>
-                                  <Text size="xs" ff="monospace" c="dimmed">
-                                    {action.slug}
-                                  </Text>
-                                  {action.isBuiltIn && (
-                                    <TablerIcon name="lock" size={10} color="gray" />
-                                  )}
-                                </Group>
-                              }
-                            />
-                          </Group>
-                        ))}
-                      </Stack>
-                    </Box>
-                  );
-                })}
-              </Stack>
-            </ScrollArea>
-          )}
+          <ScrollArea h={360} offsetScrollbars>
+            <Stack gap="sm">
+              {resources.map((resource) => (
+                <Box key={resource.slug}>
+                  <Group gap="xs" mb={4}>
+                    <Text size="sm" fw={600}>
+                      {resource.name}
+                    </Text>
+                    <Text size="xs" ff="monospace" c="dimmed">
+                      {resource.slug}
+                    </Text>
+                  </Group>
+                  <Stack gap={2} pl="sm">
+                    {resource.actions.map((action) => {
+                      const key = grantKey({ resource: resource.slug, action: action.slug });
+                      return (
+                        <Group key={key} gap="xs">
+                          <Checkbox
+                            size="xs"
+                            checked={selected.has(key)}
+                            onChange={() => toggleGrant(key)}
+                            label={
+                              <Group gap={4}>
+                                <Text size="xs">{action.name}</Text>
+                                <Text size="xs" ff="monospace" c="dimmed">
+                                  {action.slug}
+                                </Text>
+                              </Group>
+                            }
+                          />
+                        </Group>
+                      );
+                    })}
+                  </Stack>
+                </Box>
+              ))}
+            </Stack>
+          </ScrollArea>
         </Stack>
         <Group gap={1}>
           <Button flex={1} variant="default" radius={0} onClick={closeWorkspace}>

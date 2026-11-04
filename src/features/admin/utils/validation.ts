@@ -36,24 +36,6 @@ export const TransitionReasonSchema = z.object({
   description: z.string().optional(),
 });
 
-export const ResourceSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  slug: z
-    .string()
-    .min(1, 'Slug is required')
-    .regex(/^[a-zA-Z][a-zA-Z0-9]*$/, 'Slug must be camelCase (e.g. documentCase)'),
-  description: z.string().optional(),
-});
-
-export const ResourceActionSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  slug: z
-    .string()
-    .min(1, 'Slug is required')
-    .regex(/^[a-z0-9-]+$/, 'Slug must be kebab-case (e.g. list-any)'),
-  description: z.string().optional(),
-});
-
 export const RoleSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   slug: z

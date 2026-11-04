@@ -8,10 +8,8 @@ import {
 } from '@/lib/api';
 import {
   EffectivePermissions,
+  PermissionGrant,
   Resource,
-  ResourceAction,
-  ResourceActionFormData,
-  ResourceFormData,
   RoleFormData,
   RoleRecord,
 } from '../types';
@@ -44,7 +42,7 @@ export const useRoleRecordsApi = () => {
     return res.data;
   };
 
-  const updateRole = async (id: string, payload: Partial<RoleFormData>) => {
+  const updateRole = async (id: string, payload: Partial<Omit<RoleFormData, 'slug'>>) => {
     const res = await apiFetch<RoleRecord>(`/roles/${id}`, { method: 'PATCH', data: payload });
     return res.data;
   };
@@ -59,10 +57,10 @@ export const useRoleRecordsApi = () => {
     return res.data;
   };
 
-  const setRolePermissions = async (id: string, resourceActionIds: string[]) => {
+  const setRolePermissions = async (id: string, permissions: PermissionGrant[]) => {
     const res = await apiFetch<RoleRecord>(`/roles/${id}/permissions`, {
       method: 'PUT',
-      data: { resourceActionIds },
+      data: { permissions },
     });
     return res.data;
   };
@@ -72,7 +70,7 @@ export const useRoleRecordsApi = () => {
   return { createRole, updateRole, deleteRole, restoreRole, setRolePermissions, mutateRoles };
 };
 
-// ─── Resources ────────────────────────────────────────────────────────────────
+// ─── Resources (read-only, defined in the backend's auth.acl.ts) ──────────────
 
 export const useResources = (filters: Record<string, any> = {}) => {
   const url = constructUrl('/roles/resources', filters);
@@ -85,79 +83,6 @@ export const useResources = (filters: Record<string, any> = {}) => {
     error,
     isLoading,
     mutate,
-  };
-};
-
-export const useResource = (id?: string) => {
-  const url = constructUrl(`/roles/resources/${id}`);
-  const { data, error, isLoading, mutate } = useApi<APIFetchResponse<Resource>>(id ? url : null);
-  return { resource: data?.data, error, isLoading, mutate };
-};
-
-export const useResourcesApi = () => {
-  const createResource = async (payload: ResourceFormData) => {
-    const res = await apiFetch<Resource>('/roles/resources', { method: 'POST', data: payload });
-    return res.data;
-  };
-
-  const updateResource = async (id: string, payload: Partial<ResourceFormData>) => {
-    const res = await apiFetch<Resource>(`/roles/resources/${id}`, {
-      method: 'PATCH',
-      data: payload,
-    });
-    return res.data;
-  };
-
-  const deleteResource = async (id: string) => {
-    const res = await apiFetch<Resource>(`/roles/resources/${id}`, { method: 'DELETE' });
-    return res.data;
-  };
-
-  const restoreResource = async (id: string) => {
-    const res = await apiFetch<Resource>(`/roles/resources/${id}/restore`, { method: 'POST' });
-    return res.data;
-  };
-
-  const createAction = async (resourceId: string, payload: ResourceActionFormData) => {
-    const res = await apiFetch<ResourceAction>(`/roles/resources/${resourceId}/actions`, {
-      method: 'POST',
-      data: payload,
-    });
-    return res.data;
-  };
-
-  const updateAction = async (actionId: string, payload: Partial<ResourceActionFormData>) => {
-    const res = await apiFetch<ResourceAction>(`/roles/actions/${actionId}`, {
-      method: 'PATCH',
-      data: payload,
-    });
-    return res.data;
-  };
-
-  const deleteAction = async (actionId: string) => {
-    const res = await apiFetch<ResourceAction>(`/roles/actions/${actionId}`, { method: 'DELETE' });
-    return res.data;
-  };
-
-  const restoreAction = async (actionId: string) => {
-    const res = await apiFetch<ResourceAction>(`/roles/actions/${actionId}/restore`, {
-      method: 'POST',
-    });
-    return res.data;
-  };
-
-  const mutateResources = () => globalMutate('/roles/resources');
-
-  return {
-    createResource,
-    updateResource,
-    deleteResource,
-    restoreResource,
-    createAction,
-    updateAction,
-    deleteAction,
-    restoreAction,
-    mutateResources,
   };
 };
 

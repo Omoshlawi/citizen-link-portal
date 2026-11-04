@@ -80,10 +80,13 @@ export const createFoundDocumentCase = async (payload: FoundDocumentCaseFormData
 };
 
 export const createStationIntakeCase = async (payload: StationIntakeFormData) => {
-  const intakeCase = await apiFetch<DocumentCase>('/documents/cases/found/intake', {
-    method: 'POST',
-    data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
-  });
+  const intakeCase = await apiFetch<{ id: string; caseNumber: string }>(
+    '/documents/cases/found/intake',
+    {
+      method: 'POST',
+      data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
+    }
+  );
   mutate('/documents/cases');
   return intakeCase.data;
 };

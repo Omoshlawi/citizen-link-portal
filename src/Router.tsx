@@ -55,7 +55,7 @@ import {
   StaffStationOperationsPage,
 } from './features/custody/pages';
 import { DashboardLayout } from './features/dashboard/components';
-import { RequirePagePermission } from './features/dashboard/navigation';
+import { RequirePagePermission, RequireStaffAccess } from './features/dashboard/navigation';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { ConfirmDeliveryPage, OpenCasePage } from './features/deep-link/pages';
 import { AuthLayout, LoginRequired } from './features/landing/components';
@@ -159,7 +159,9 @@ const router = createBrowserRouter([
     path: '/select-station',
     element: (
       <LoginRequired redirectTo="/login">
-        <StationSelectionLayout />
+        <RequireStaffAccess>
+          <StationSelectionLayout />
+        </RequireStaffAccess>
       </LoginRequired>
     ),
     children: [{ index: true, element: <StationSelectionPage /> }],
@@ -168,9 +170,11 @@ const router = createBrowserRouter([
     path: '/dashboard',
     element: (
       <LoginRequired>
-        <StationContextRequired>
-          <DashboardLayout />
-        </StationContextRequired>
+        <RequireStaffAccess>
+          <StationContextRequired>
+            <DashboardLayout />
+          </StationContextRequired>
+        </RequireStaffAccess>
       </LoginRequired>
     ),
     children: [
