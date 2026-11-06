@@ -9,7 +9,7 @@ const LIST_PRIVILEGES: Record<ListResource, { all: PermissionRule; station: Perm
   claims: { all: { claim: ['list-any'] }, station: { claim: ['list-station'] } },
   matches: { all: { match: ['list-any'] }, station: { match: ['list-station'] } },
   exchanges: {
-    all: { handover: ['manage-any'], documentCase: ['list-any'] },
+    all: { handover: ['list-any'] },
     station: { handover: ['list-station'] },
   },
   invoices: { all: { invoice: ['list-any'] }, station: { invoice: ['list-station'] } },

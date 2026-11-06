@@ -80,12 +80,6 @@ export const StationIntakeSchema = FoundDocumentCaseBaseSchema.pick({
   tags: true,
   description: true,
   images: true,
-}).extend({
-  finderPhone: z
-    .string()
-    .trim()
-    .optional()
-    .transform((value) => value || undefined),
 });
 
 export const FoundDocumentCaseSchema = FoundDocumentCaseBaseSchema.superRefine((data, ctx) => {

@@ -174,14 +174,6 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
               {isIntake ? `Walk-in at ${intakeStation?.name ?? '—'}` : 'Reported by finder'}
             </Text>
           </Grid.Col>
-          {isIntake && (
-            <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-              <Text size="sm" fw={600} c="dimmed" mb={4}>
-                Finder's Phone
-              </Text>
-              <Text>{foundDocumentCase?.finderPhone || 'Not given'}</Text>
-            </Grid.Col>
-          )}
         </Grid>
         <CaseNotes />
       </Stack>

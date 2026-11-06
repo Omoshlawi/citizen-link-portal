@@ -107,8 +107,6 @@ export interface FoundDocumentCase {
   /** STATION_INTAKE: the station the document was handed in at (fixed at intake). */
   intakeStationId?: string | null;
   intakeStation?: Station | null;
-  /** STATION_INTAKE: optional walk-in finder contact (subscriber digits). Staff only. */
-  finderPhone?: string | null;
   createdAt: string;
   updatedAt: string;
   pointAwarded: number;

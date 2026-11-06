@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Group, Select, Stack, Textarea, TextInput } from '@mantine/core';
+import { Alert, Button, Group, Select, Stack, Textarea } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton, TablerIcon } from '@/components';
@@ -190,22 +190,6 @@ const StationIntakeForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormProps)
                 error={fieldState.error?.message}
                 minRows={3}
                 autosize
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="finderPhone"
-            render={({ field, fieldState }) => (
-              <TextInput
-                {...field}
-                value={field.value ?? ''}
-                label="Finder's phone number"
-                description="Optional. Ask the person first; it is only used to contact them about this document and is never shown to the owner."
-                placeholder="e.g. 0712345678"
-                error={fieldState.error?.message}
-                leftSection={<TablerIcon name="phone" size={18} />}
               />
             )}
           />
