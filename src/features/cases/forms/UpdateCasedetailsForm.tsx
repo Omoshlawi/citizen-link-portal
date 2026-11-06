@@ -2,15 +2,15 @@ import dayjs from 'dayjs';
 import React, { FC } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { Button, Group, Select, Stack, TagsInput, Textarea } from '@mantine/core';
+import { Button, Group, Stack, TagsInput, Textarea } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
-import { InputSkeleton, TablerIcon } from '@/components';
-import { useAddresses } from '@/features/addresses/hooks';
+import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { useDocumentCaseApi } from '../hooks';
-import { DocumentCase, FoundDocumentCaseFormData } from '../types';
-import { FoundDocumentCaseSchema } from '../utils/validation';
+import { DocumentCase, UpdateCaseDetailsFormData } from '../types';
+import { UpdateCaseDetailsSchema } from '../utils/validation';
+import CaseLocationFields from './CaseLocationFields';
 
 type UpdateCasedetailsFormProps = {
   documentCase: DocumentCase;
@@ -23,19 +23,21 @@ const UpdateCasedetailsForm: FC<UpdateCasedetailsFormProps> = ({
   onSuccess,
   closeWorkspace,
 }) => {
-  const form = useForm<FoundDocumentCaseFormData>({
+  const form = useForm<UpdateCaseDetailsFormData>({
     defaultValues: {
       eventDate: documentCase.eventDate ? dayjs(documentCase.eventDate).toDate() : undefined,
       description: documentCase.description ?? undefined,
       tags: documentCase.tags ?? undefined,
-      addressId: documentCase.addressId ?? undefined,
+      level1: documentCase.level1,
+      level2: documentCase.level2 ?? undefined,
+      level3: documentCase.level3 ?? undefined,
+      place: documentCase.place ?? undefined,
     },
-    resolver: zodResolver(FoundDocumentCaseSchema),
+    resolver: zodResolver(UpdateCaseDetailsSchema),
   });
-  const { addresses, isLoading: isLoadingAddresses } = useAddresses();
   const { updateDocumentCase } = useDocumentCaseApi();
 
-  const handleSubmit: SubmitHandler<FoundDocumentCaseFormData> = async (data) => {
+  const handleSubmit: SubmitHandler<UpdateCaseDetailsFormData> = async (data) => {
     try {
       const { eventDate, ...rest } = data;
       const payload = {
@@ -51,7 +53,7 @@ const UpdateCasedetailsForm: FC<UpdateCasedetailsFormProps> = ({
       });
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<FoundDocumentCaseFormData>(error);
+      const e = handleApiErrors<UpdateCaseDetailsFormData>(error);
       if (e.detail) {
         showNotification({
           title: 'Error updating case details',
@@ -60,16 +62,11 @@ const UpdateCasedetailsForm: FC<UpdateCasedetailsFormProps> = ({
         });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof FoundDocumentCaseFormData, { message: val as string })
+          form.setError(key as keyof UpdateCaseDetailsFormData, { message: val as string })
         );
       }
     }
   };
-
-  const addressOptions = addresses.map((address) => ({
-    value: address.id,
-    label: address.label || address.address1 || address.formatted || address.id,
-  }));
 
   const isLostCase = !!documentCase.lostDocumentCase;
   const dateLabel = isLostCase ? 'Date Lost' : 'Date Found';
@@ -102,27 +99,9 @@ const UpdateCasedetailsForm: FC<UpdateCasedetailsFormProps> = ({
               />
             )}
           />
-          <Controller
-            control={form.control}
-            name="addressId"
-            render={({ field, fieldState }) =>
-              isLoadingAddresses ? (
-                <InputSkeleton />
-              ) : (
-                <Select
-                  {...field}
-                  value={field.value || null}
-                  data={addressOptions}
-                  label="Address"
-                  error={fieldState.error?.message}
-                  nothingFoundMessage="No addresses found"
-                  searchable
-                  placeholder="Select address"
-                  leftSection={<TablerIcon name="mapPin" size={18} />}
-                  required
-                />
-              )
-            }
+          <CaseLocationFields
+            form={form}
+            placeLabel={isLostCase ? 'Where it was lost' : 'Where it was found'}
           />
           <Controller
             control={form.control}

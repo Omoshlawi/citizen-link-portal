@@ -28,7 +28,7 @@ export const useMatches = (params: Record<string, any> = {}) => {
 export const useMatch = (matchId?: string) => {
   const url = matchId
     ? constructUrl(`/matching/${matchId}`, {
-        v: 'custom:include(lostDocumentCase:include(case:include(document:include(type,images,additionalFields),address)),foundDocumentCase:include(case:include(document:include(type,images,additionalFields),address)))',
+        v: 'custom:include(lostDocumentCase:include(case:include(document:include(type,images,additionalFields))),foundDocumentCase:include(case:include(document:include(type,images,additionalFields))))',
       })
     : null;
   const { data, error, isLoading } = useSWR<APIFetchResponse<Match>>(url);

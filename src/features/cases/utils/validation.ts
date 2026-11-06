@@ -42,9 +42,16 @@ export const DocumentFieldSchema = z.object({
   fieldValue: z.string().min(1, 'Required'),
 });
 
+const CaseLocationSchema = z.object({
+  level1: z.string().trim().min(1, 'Required'),
+  level2: z.string().trim().nullish(),
+  level3: z.string().trim().nullish(),
+  place: z.string().trim().max(200).nullish(),
+});
+
 export const DocumentCaseSchema = z.object({
   documentId: z.string().min(1),
-  addressId: z.string().min(1),
+  ...CaseLocationSchema.shape,
   description: z.string().optional(),
   eventDate: z.coerce.date(),
   tags: z.string().min(1).array().optional(),
@@ -61,7 +68,7 @@ export const DocumentCaseSchema = z.object({
 
 const FoundDocumentCaseBaseSchema = z.object({
   typeId: z.string().uuid(),
-  addressId: z.string().uuid(),
+  ...CaseLocationSchema.shape,
   eventDate: z.coerce.date(),
   tags: z.string().min(1).array().optional(),
   description: z.string().optional(),
@@ -75,11 +82,25 @@ const FoundDocumentCaseBaseSchema = z.object({
 /** A walk-in document logged by staff at their active station. */
 export const StationIntakeSchema = FoundDocumentCaseBaseSchema.pick({
   typeId: true,
-  addressId: true,
+  level1: true,
+  level2: true,
+  level3: true,
+  place: true,
   eventDate: true,
   tags: true,
   description: true,
   images: true,
+});
+
+/** Editing a case's details; the document type and images aren't part of this form. */
+export const UpdateCaseDetailsSchema = FoundDocumentCaseBaseSchema.pick({
+  level1: true,
+  level2: true,
+  level3: true,
+  place: true,
+  eventDate: true,
+  tags: true,
+  description: true,
 });
 
 export const FoundDocumentCaseSchema = FoundDocumentCaseBaseSchema.superRefine((data, ctx) => {

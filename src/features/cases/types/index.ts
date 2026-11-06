@@ -1,6 +1,5 @@
 import { User } from 'better-auth';
 import { z } from 'zod';
-import { Address } from '@/features/addresses/types';
 import { Station } from '@/features/custody/types';
 import { ExchangeStatus } from '@/features/exchange';
 import {
@@ -8,6 +7,7 @@ import {
   FoundDocumentCaseSchema,
   LostDocumentCaseSchema,
   StationIntakeSchema,
+  UpdateCaseDetailsSchema,
 } from '../utils';
 
 export interface DocumentCase {
@@ -15,9 +15,11 @@ export interface DocumentCase {
   caseNumber: string;
   userId: string;
   user?: User;
-  addressId: string;
+  level1: string;
+  level2?: string | null;
+  level3?: string | null;
+  place?: string | null;
   extractions?: AIExtraction[];
-  address?: Address;
   eventDate: string;
   tags: string[];
   description?: string;
@@ -315,6 +317,7 @@ export interface SecurityQuestion {
 
 export type FoundDocumentCaseFormData = z.infer<typeof FoundDocumentCaseSchema>;
 export type StationIntakeFormData = z.infer<typeof StationIntakeSchema>;
+export type UpdateCaseDetailsFormData = z.infer<typeof UpdateCaseDetailsSchema>;
 
 export type LostDocumentCaseFormData = z.infer<typeof LostDocumentCaseSchema>;
 export type CaseDocumentFormData = z.infer<typeof CaseDocumentSchema>;

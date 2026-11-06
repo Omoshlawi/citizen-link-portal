@@ -17,13 +17,13 @@ import {
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton, TablerIcon } from '@/components';
-import { useAddresses } from '@/features/addresses/hooks';
 import { useDocumentTypes } from '@/features/admin/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { INPUT_WRAPPER_ORDER } from '@/lib/utils';
 import { useDocumentCaseApi } from '../hooks';
 import { DocumentCase, LostDocumentCaseFormData } from '../types';
 import { LostDocumentCaseSchema } from '../utils';
+import CaseLocationFields from './CaseLocationFields';
 
 type LostDocumentCaseFormProps = {
   closeWorkspace?: () => void;
@@ -38,7 +38,6 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
     },
     resolver: zodResolver(LostDocumentCaseSchema),
   });
-  const { addresses, isLoading } = useAddresses();
   const { documentTypes, isLoading: isDocumentTypesLoading } = useDocumentTypes();
   const { createLostDocumentCase } = useDocumentCaseApi();
 
@@ -135,30 +134,7 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
                 />
               )}
             />
-            <Controller
-              control={form.control}
-              name="addressId"
-              render={({ field, fieldState }) =>
-                isLoading ? (
-                  <InputSkeleton />
-                ) : (
-                  <Select
-                    {...field}
-                    value={field.value || null}
-                    data={addresses.map((l) => ({ value: l.id, label: l.label ?? '' }))}
-                    label="Address"
-                    error={fieldState.error?.message}
-                    nothingFoundMessage="Nothing found..."
-                    searchable
-                    placeholder="Select address"
-                    leftSection={<TablerIcon name="mapPin" size={18} />}
-                    inputWrapperOrder={INPUT_WRAPPER_ORDER}
-                    description="The address where the document was lost"
-                    required
-                  />
-                )
-              }
-            />
+            <CaseLocationFields form={form} placeLabel="Where it was lost" />
             <Controller
               control={form.control}
               name="description"

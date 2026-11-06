@@ -6,13 +6,13 @@ import { Alert, Button, Group, Select, Stack, Textarea } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton, TablerIcon } from '@/components';
-import { useAddresses } from '@/features/addresses/hooks';
 import { useDocumentTypes } from '@/features/admin/hooks';
 import { handleApiErrors, uploadFile } from '@/lib/api';
 import { ImageUpload, ImageUploadRef } from '../components';
 import { createStationIntakeCase } from '../hooks';
 import { DocumentCase, StationIntakeFormData } from '../types';
 import { StationIntakeSchema } from '../utils';
+import CaseLocationFields from './CaseLocationFields';
 
 type DocumentCaseFormProps = {
   closeWorkspace?: () => void;
@@ -28,7 +28,6 @@ const StationIntakeForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormProps)
     defaultValues: { images: [] },
     resolver: zodResolver(StationIntakeSchema),
   });
-  const { addresses, isLoading: isLoadingAddresses } = useAddresses();
   const { documentTypes, isLoading: isLoadingTypes } = useDocumentTypes();
 
   const handleSubmit: SubmitHandler<StationIntakeFormData> = async (data) => {
@@ -154,29 +153,7 @@ const StationIntakeForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormProps)
               />
             )}
           />
-          <Controller
-            control={form.control}
-            name="addressId"
-            render={({ field, fieldState }) =>
-              isLoadingAddresses ? (
-                <InputSkeleton />
-              ) : (
-                <Select
-                  {...field}
-                  value={field.value || null}
-                  data={addresses.map((l) => ({ value: l.id, label: l.label ?? '' }))}
-                  label="Address"
-                  description="Where the document was found"
-                  error={fieldState.error?.message}
-                  nothingFoundMessage="Nothing found..."
-                  searchable
-                  placeholder="Select address"
-                  leftSection={<TablerIcon name="mapPin" size={18} />}
-                  required
-                />
-              )
-            }
-          />
+          <CaseLocationFields form={form} placeLabel="Where it was found" />
           <Controller
             control={form.control}
             name="description"

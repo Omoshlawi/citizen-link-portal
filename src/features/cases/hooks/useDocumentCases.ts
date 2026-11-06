@@ -38,7 +38,7 @@ export const useCustodyCandidates = (params: Record<string, any> = {}) => {
 
 export const useDocumentCase = (reportId?: string) => {
   const url = constructUrl(`/documents/cases/${reportId}`, {
-    v: 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type, images),document:include(additionalFields),address:include(locale),extractions)',
+    v: 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type, images),document:include(additionalFields),extractions)',
   });
   const { data, error, mutate, isLoading } = useApi<APIFetchResponse<DocumentCase>>(
     reportId ? url : null,

@@ -137,10 +137,10 @@ export const DocumentCasesTable = ({ type: activeTab }: { type: CaseTab }) => {
 
   const vParam =
     activeTab === 'found'
-      ? 'custom:include(foundDocumentCase:include(currentStation),document:include(type),address,user,extractions)'
+      ? 'custom:include(foundDocumentCase:include(currentStation),document:include(type),user,extractions)'
       : activeTab === 'lost'
-        ? 'custom:include(lostDocumentCase,document:include(type),address,user,extractions)'
-        : 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type),address,user,extractions)';
+        ? 'custom:include(lostDocumentCase,document:include(type),user,extractions)'
+        : 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type),user,extractions)';
 
   const documentCasesAsync = useDocumentCases({
     v: vParam,

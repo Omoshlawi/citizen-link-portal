@@ -1,6 +1,7 @@
 import React from 'react';
 import { Grid, Group, Stack, Text } from '@mantine/core';
 import { SectionTitle } from '@/components';
+import { usePublicConfig } from '@/hooks/usePublicConfig';
 import { CaseType, DocumentCase } from '../types';
 
 interface LocationProps {
@@ -10,82 +11,33 @@ interface LocationProps {
 }
 
 const LocationInformation: React.FC<LocationProps> = ({ documentCase }) => {
-  const address = documentCase.address;
+  const { addressLocaleSpec } = usePublicConfig();
 
-  const getLevel = (level: string) =>
-    address?.locale?.formatSpec?.levels?.find((l) => l.level === level)?.label ??
+  const levelLabel = (level: string) =>
+    addressLocaleSpec?.levels.find((spec) => spec.level === level)?.label ??
     `Administrative Level ${level.replace('level', '')}`;
+
+  const rows = [
+    { label: levelLabel('level1'), value: documentCase.level1 },
+    { label: levelLabel('level2'), value: documentCase.level2 },
+    { label: levelLabel('level3'), value: documentCase.level3 },
+    { label: 'Place', value: documentCase.place },
+  ];
 
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
         <SectionTitle label="Location Information" />
       </Group>
-
-      {/* Administrative Levels */}
-      <SectionTitle label="Administrative Area" />
       <Grid>
-        {address?.country && (
-          <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+        {rows.map(({ label, value }) => (
+          <Grid.Col key={label} span={{ base: 12, sm: 6, md: 4 }}>
             <Text size="sm" fw={600} c="dimmed" mb={4}>
-              Country
+              {label}
             </Text>
-            <Text>{address.country}</Text>
+            <Text>{value || 'N/A'}</Text>
           </Grid.Col>
-        )}
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {getLevel('level1')}
-          </Text>
-          <Text>{address?.level1 || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {getLevel('level2')}
-          </Text>
-          <Text>{address?.level2 || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {getLevel('level3')}
-          </Text>
-          <Text>{address?.level3 || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {getLevel('level4')}
-          </Text>
-          <Text>{address?.level4 || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {getLevel('level5')}
-          </Text>
-          <Text>{address?.level5 || 'N/A'}</Text>
-        </Grid.Col>
-      </Grid>
-
-      {/* Street Address */}
-      <SectionTitle label="Street Address" />
-      <Grid>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Address 1
-          </Text>
-          <Text>{address?.address1 || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Address 2
-          </Text>
-          <Text>{address?.address2 || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Landmark
-          </Text>
-          <Text>{address?.landmark || 'N/A'}</Text>
-        </Grid.Col>
+        ))}
       </Grid>
     </Stack>
   );
