@@ -46,7 +46,7 @@ const CaseLocationSchema = z.object({
   level1: z.string().trim().min(1, 'Required'),
   level2: z.string().trim().nullish(),
   level3: z.string().trim().nullish(),
-  place: z.string().trim().max(200).nullish(),
+  place: z.string().trim().max(500).nullish(),
 });
 
 export const DocumentCaseSchema = z.object({

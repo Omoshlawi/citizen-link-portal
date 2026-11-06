@@ -96,7 +96,7 @@ const CaseLocationFields = <T extends CaseLocationValues>({
             label={placeLabel}
             description="Optional. Describe the place, without anyone's name or home address."
             placeholder="e.g. Near the Westlands stage"
-            maxLength={200}
+            maxLength={500}
             error={fieldState.error?.message}
             leftSection={<TablerIcon name="mapPin" size={18} />}
           />
