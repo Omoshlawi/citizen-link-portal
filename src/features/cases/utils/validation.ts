@@ -82,9 +82,6 @@ const FoundDocumentCaseBaseSchema = z.object({
 /** A walk-in document logged by staff at their active station. */
 export const StationIntakeSchema = FoundDocumentCaseBaseSchema.pick({
   typeId: true,
-  level1: true,
-  level2: true,
-  level3: true,
   place: true,
   eventDate: true,
   tags: true,

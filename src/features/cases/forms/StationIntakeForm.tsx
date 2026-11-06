@@ -153,7 +153,7 @@ const StationIntakeForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormProps)
               />
             )}
           />
-          <CaseLocationFields form={form} placeLabel="Where it was found" />
+          <CaseLocationFields form={form} placeLabel="Where it was found" showArea={false} />
           <Controller
             control={form.control}
             name="description"

@@ -15,12 +15,15 @@ type CaseLocationFieldsProps<T extends FieldValues> = {
   form: UseFormReturn<T>;
   /** Shown under the place field, e.g. where the document was found. */
   placeLabel: string;
+  /** Off where the area is already known, leaving only the place field. */
+  showArea?: boolean;
 };
 
 /** Where a document was lost or found: an area, plus optional typed detail. */
-const CaseLocationFields = <T extends CaseLocationValues>({
+const CaseLocationFields = <T extends FieldValues>({
   form: anyForm,
   placeLabel,
+  showArea = true,
 }: CaseLocationFieldsProps<T>) => {
   const form = anyForm as unknown as UseFormReturn<CaseLocationValues>;
   const { countryCode, addressLocaleSpec } = usePublicConfig();
@@ -32,60 +35,62 @@ const CaseLocationFields = <T extends CaseLocationValues>({
 
   return (
     <Stack gap="md">
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
-        <Controller
-          control={form.control}
-          name="level1"
-          render={({ field, fieldState }) => (
-            <HierarchyLevelSelect
-              level={1}
-              country={countryCode}
-              label={levelLabel('level1', 'Level 1')}
-              required
-              value={field.value ?? ''}
-              error={fieldState.error?.message}
-              onChange={(value) => {
-                field.onChange(value);
-                form.setValue('level2', '');
-                form.setValue('level3', '');
-              }}
-            />
-          )}
-        />
-        <Controller
-          control={form.control}
-          name="level2"
-          render={({ field, fieldState }) => (
-            <HierarchyLevelSelect
-              level={2}
-              country={countryCode}
-              parentName={level1}
-              label={levelLabel('level2', 'Level 2')}
-              value={field.value ?? ''}
-              error={fieldState.error?.message}
-              onChange={(value) => {
-                field.onChange(value);
-                form.setValue('level3', '');
-              }}
-            />
-          )}
-        />
-        <Controller
-          control={form.control}
-          name="level3"
-          render={({ field, fieldState }) => (
-            <HierarchyLevelSelect
-              level={3}
-              country={countryCode}
-              parentName={level2 ?? undefined}
-              label={levelLabel('level3', 'Level 3')}
-              value={field.value ?? ''}
-              error={fieldState.error?.message}
-              onChange={field.onChange}
-            />
-          )}
-        />
-      </SimpleGrid>
+      {showArea && (
+        <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+          <Controller
+            control={form.control}
+            name="level1"
+            render={({ field, fieldState }) => (
+              <HierarchyLevelSelect
+                level={1}
+                country={countryCode}
+                label={levelLabel('level1', 'Level 1')}
+                required
+                value={field.value ?? ''}
+                error={fieldState.error?.message}
+                onChange={(value) => {
+                  field.onChange(value);
+                  form.setValue('level2', '');
+                  form.setValue('level3', '');
+                }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="level2"
+            render={({ field, fieldState }) => (
+              <HierarchyLevelSelect
+                level={2}
+                country={countryCode}
+                parentName={level1}
+                label={levelLabel('level2', 'Level 2')}
+                value={field.value ?? ''}
+                error={fieldState.error?.message}
+                onChange={(value) => {
+                  field.onChange(value);
+                  form.setValue('level3', '');
+                }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="level3"
+            render={({ field, fieldState }) => (
+              <HierarchyLevelSelect
+                level={3}
+                country={countryCode}
+                parentName={level2 ?? undefined}
+                label={levelLabel('level3', 'Level 3')}
+                value={field.value ?? ''}
+                error={fieldState.error?.message}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </SimpleGrid>
+      )}
       <Controller
         control={form.control}
         name="place"
